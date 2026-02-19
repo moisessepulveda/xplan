@@ -12,7 +12,9 @@ use App\Http\Requests\Account\StoreAccountRequest;
 use App\Http\Requests\Account\TransferRequest;
 use App\Http\Requests\Account\UpdateAccountRequest;
 use App\Http\Resources\AccountResource;
+use App\Http\Resources\TransactionResource;
 use App\Models\Account;
+use App\Models\Transaction;
 use App\Services\BalanceCalculator;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -53,8 +55,20 @@ class AccountController extends Controller
 
     public function show(Account $account, BalanceCalculator $calculator): Response
     {
+        // Obtener transacciones de esta cuenta (como origen o destino)
+        $transactions = Transaction::with(['category', 'account', 'destinationAccount'])
+            ->where(function ($query) use ($account) {
+                $query->where('account_id', $account->id)
+                    ->orWhere('destination_account_id', $account->id);
+            })
+            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+
         return Inertia::render('Accounts/Show', [
             'account' => new AccountResource($account),
+            'transactions' => TransactionResource::collection($transactions),
         ]);
     }
 
