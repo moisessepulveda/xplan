@@ -41,8 +41,26 @@ export interface PlanningMember {
   planning_id: number;
   user_id: number;
   role: MemberRole;
+  role_label: string;
+  is_owner: boolean;
+  invited_by_id?: number;
   joined_at: string;
-  user?: User;
+  user?: {
+    id: number;
+    name: string;
+    email: string;
+    avatar?: string;
+  };
+  invited_by?: {
+    id: number;
+    name: string;
+  };
+  created_at: string;
+}
+
+export interface RoleOption {
+  value: MemberRole;
+  label: string;
 }
 
 export interface Invitation {
@@ -50,12 +68,25 @@ export interface Invitation {
   planning_id: number;
   email: string;
   role: MemberRole;
+  role_label: string;
   status: InvitationStatus;
-  created_by_id: number;
+  status_label: string;
+  token: string;
+  is_expired: boolean;
+  is_pending: boolean;
   expires_at: string;
+  responded_at?: string;
   created_at: string;
-  planning?: Planning;
-  created_by?: User;
+  planning?: {
+    id: number;
+    name: string;
+    icon: string;
+    color: string;
+  };
+  created_by?: {
+    id: number;
+    name: string;
+  };
 }
 
 export type InvitationStatus = 'pending' | 'accepted' | 'rejected' | 'expired';

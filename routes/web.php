@@ -10,6 +10,8 @@ use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CreditController;
+use App\Http\Controllers\InvitationController;
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ReceivableController;
 use App\Http\Middleware\EnsureActivePlanning;
 use Illuminate\Support\Facades\Route;
@@ -54,6 +56,12 @@ Route::middleware('auth')->group(function () {
     // Planning management (partial - creation doesn't need active planning)
     Route::get('plannings/create', [PlanningController::class, 'create'])->name('plannings.create');
     Route::post('plannings', [PlanningController::class, 'store'])->name('plannings.store');
+
+    // Invitations (accessible without active planning for accepting)
+    Route::get('invitations/{token}', [InvitationController::class, 'show'])->name('invitations.show');
+    Route::post('invitations/{token}/accept', [InvitationController::class, 'accept'])->name('invitations.accept');
+    Route::post('invitations/{token}/reject', [InvitationController::class, 'reject'])->name('invitations.reject');
+    Route::get('my-invitations', [InvitationController::class, 'received'])->name('invitations.received');
 
     /*
     |--------------------------------------------------------------------------
@@ -105,6 +113,15 @@ Route::middleware('auth')->group(function () {
         Route::post('credits/{credit}/installments/{installment}/pay', [CreditController::class, 'payInstallment'])->name('credits.pay-installment');
         Route::post('credits/{credit}/extra-payment', [CreditController::class, 'extraPayment'])->name('credits.extra-payment');
         Route::get('credits/{credit}/simulate', [CreditController::class, 'simulate'])->name('credits.simulate');
+
+        // Members (Colaboración)
+        Route::get('members', [MemberController::class, 'index'])->name('members.index');
+        Route::get('members/invite', [MemberController::class, 'invite'])->name('members.invite');
+        Route::post('members/invite', [MemberController::class, 'sendInvitation'])->name('members.send-invitation');
+        Route::put('members/{member}/role', [MemberController::class, 'changeRole'])->name('members.change-role');
+        Route::delete('members/{member}', [MemberController::class, 'remove'])->name('members.remove');
+        Route::post('members/invitations/{invitation}/cancel', [MemberController::class, 'cancelInvitation'])->name('members.cancel-invitation');
+        Route::post('members/invitations/{invitation}/resend', [MemberController::class, 'resendInvitation'])->name('members.resend-invitation');
 
         // Receivables (Cuentas Pendientes)
         Route::resource('receivables', ReceivableController::class);
