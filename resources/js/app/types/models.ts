@@ -345,11 +345,17 @@ export interface BudgetSnapshotLine {
 export interface Credit {
   id: number;
   planning_id: number;
+  account_id?: number;
   name: string;
   type: CreditType;
+  type_label: string;
+  type_color: string;
+  type_icon: string;
   entity?: string;
   original_amount: number;
   pending_amount: number;
+  paid_amount: number;
+  progress: number;
   currency: string;
   interest_rate: number;
   rate_type: 'fixed' | 'variable';
@@ -359,14 +365,39 @@ export interface Credit {
   payment_day: number;
   monthly_payment: number;
   status: CreditStatus;
+  status_label: string;
+  status_color: string;
   reference_number?: string;
   credit_limit?: number;
   billing_day?: number;
+  is_credit_card: boolean;
+  notes?: string;
+  paid_installments_count: number;
+  pending_installments_count: number;
+  total_interest: number;
+  account?: Account;
   installments?: CreditInstallment[];
+  extra_payments?: ExtraPayment[];
+  next_installment?: CreditInstallment;
+  created_at: string;
+  updated_at: string;
 }
 
 export type CreditType = 'consumer' | 'mortgage' | 'auto' | 'credit_card' | 'personal' | 'other';
 export type CreditStatus = 'active' | 'paid' | 'refinanced' | 'defaulted';
+
+export interface CreditTypeOption {
+  value: CreditType;
+  label: string;
+  color: string;
+  icon: string;
+}
+
+export interface CreditStatusOption {
+  value: CreditStatus;
+  label: string;
+  color: string;
+}
 
 export interface CreditInstallment {
   id: number;
@@ -379,11 +410,48 @@ export interface CreditInstallment {
   insurance: number;
   other_charges: number;
   status: InstallmentStatus;
+  status_label: string;
+  status_color: string;
   paid_date?: string;
   paid_amount: number;
+  remaining_amount: number;
+  is_overdue: boolean;
+  notes?: string;
 }
 
 export type InstallmentStatus = 'pending' | 'paid' | 'overdue' | 'partial';
+
+export interface ExtraPayment {
+  id: number;
+  credit_id: number;
+  account_id?: number;
+  transaction_id?: number;
+  amount: number;
+  date: string;
+  type: 'principal' | 'full';
+  notes?: string;
+  account?: Account;
+  created_at: string;
+}
+
+export interface CreditSummary {
+  total_debt: number;
+  total_monthly_payment: number;
+  active_credits_count: number;
+  upcoming_installments: CreditInstallment[];
+}
+
+export interface PrepaymentSimulation {
+  new_pending: number;
+  original_remaining_months: number;
+  new_remaining_months: number;
+  original_monthly_payment: number;
+  new_monthly_payment: number;
+  total_interest_saved: number;
+  months_saved: number;
+  payment_reduction?: number;
+  strategy: 'reduce_term' | 'reduce_payment';
+}
 
 export interface Notification {
   id: number;

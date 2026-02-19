@@ -9,6 +9,7 @@ use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\BudgetController;
+use App\Http\Controllers\CreditController;
 use App\Http\Controllers\ReceivableController;
 use App\Http\Middleware\EnsureActivePlanning;
 use Illuminate\Support\Facades\Route;
@@ -97,6 +98,13 @@ Route::middleware('auth')->group(function () {
         Route::get('budgets/history', [BudgetController::class, 'history'])->name('budgets.history');
         Route::post('budgets/{budget}/copy', [BudgetController::class, 'copy'])->name('budgets.copy');
         Route::post('budgets/{budget}/close-period', [BudgetController::class, 'closePeriod'])->name('budgets.close-period');
+
+        // Credits (Créditos y Préstamos)
+        Route::resource('credits', CreditController::class);
+        Route::get('credits/{credit}/amortization', [CreditController::class, 'amortization'])->name('credits.amortization');
+        Route::post('credits/{credit}/installments/{installment}/pay', [CreditController::class, 'payInstallment'])->name('credits.pay-installment');
+        Route::post('credits/{credit}/extra-payment', [CreditController::class, 'extraPayment'])->name('credits.extra-payment');
+        Route::get('credits/{credit}/simulate', [CreditController::class, 'simulate'])->name('credits.simulate');
 
         // Receivables (Cuentas Pendientes)
         Route::resource('receivables', ReceivableController::class);
