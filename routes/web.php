@@ -19,6 +19,9 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Middleware\EnsureActivePlanning;
 use Illuminate\Support\Facades\Route;
 
+// Offline fallback page (PWA)
+Route::get('/offline', fn () => view('offline'))->name('offline');
+
 /*
 |--------------------------------------------------------------------------
 | Guest Routes

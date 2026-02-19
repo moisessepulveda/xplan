@@ -119,3 +119,82 @@ select {
 .swipeable-item {
   touch-action: pan-y;
 }
+
+/* Smooth transitions for interactive elements */
+button,
+a,
+[role="button"] {
+  transition: opacity 0.15s ease, transform 0.1s ease;
+}
+
+button:active,
+a:active,
+[role="button"]:active {
+  transform: scale(0.97);
+}
+
+/* Card hover/press effects */
+.ant-card-hoverable:active {
+  transform: scale(0.98);
+}
+
+/* Skip link for accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--ant-color-primary, #1677ff);
+  color: #fff;
+  padding: 8px 16px;
+  z-index: 9999;
+  font-size: 14px;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Prevent text selection in app-like mode */
+@media all and (display-mode: standalone) {
+  .ant-card,
+  .ant-btn,
+  nav,
+  header {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
+/* Improve touch targets on touch devices */
+@media (pointer: coarse) {
+  button,
+  a,
+  [role="button"],
+  .ant-btn {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Smooth page transitions */
+main {
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0.9; }
+  to { opacity: 1; }
+}
+
+/* Loading shimmer for skeletons */
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+.shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}

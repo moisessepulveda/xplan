@@ -1,6 +1,6 @@
 import React from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Card, Typography, Avatar, Switch } from 'antd';
+import { Card, Typography, Avatar, Switch, Button } from 'antd';
 import {
     UserOutlined,
     LockOutlined,
@@ -11,10 +11,12 @@ import {
     BankOutlined,
     LogoutOutlined,
     RightOutlined,
+    DownloadOutlined,
 } from '@ant-design/icons';
 import { AppLayout } from '@/app/components/common/AppLayout';
 import { useAuth } from '@/app/hooks/useAuth';
 import { useTheme } from '@/app/contexts/ThemeContext';
+import { useInstallPrompt } from '@/app/hooks/useInstallPrompt';
 import { colors } from '@/app/styles/theme';
 
 interface Props {
@@ -41,6 +43,7 @@ interface MenuItem {
 
 export default function SettingsIndex({ user }: Props) {
     const { isDark, toggleTheme, mode } = useTheme();
+    const { isInstallable, isInstalled, install } = useInstallPrompt();
 
     const profileSection: MenuItem[] = [
         {
@@ -178,6 +181,40 @@ export default function SettingsIndex({ user }: Props) {
                         </div>
                     </div>
                 </Card>
+
+                {/* Install App Banner */}
+                {isInstallable && !isInstalled && (
+                    <Card
+                        style={{
+                            borderRadius: 12,
+                            marginBottom: 16,
+                            background: `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.primary[600]} 100%)`,
+                        }}
+                        styles={{ body: { padding: 16 } }}
+                    >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div>
+                                <Typography.Text strong style={{ color: '#fff', fontSize: 14 }}>
+                                    Instalar XPlan
+                                </Typography.Text>
+                                <Typography.Text style={{ color: 'rgba(255,255,255,0.8)', display: 'block', fontSize: 12 }}>
+                                    Acceso rápido desde tu pantalla de inicio
+                                </Typography.Text>
+                            </div>
+                            <Button
+                                icon={<DownloadOutlined />}
+                                onClick={install}
+                                style={{
+                                    backgroundColor: 'rgba(255,255,255,0.2)',
+                                    color: '#fff',
+                                    border: 'none',
+                                }}
+                            >
+                                Instalar
+                            </Button>
+                        </div>
+                    </Card>
+                )}
 
                 {renderSection('CUENTA', profileSection)}
                 {renderSection('APLICACIÓN', appSection)}

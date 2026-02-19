@@ -4,6 +4,8 @@ import { useFlash } from '@/app/hooks/useFlash';
 import { colors } from '@/app/styles/theme';
 import { Header } from './Header';
 import { BottomNavigation } from './BottomNavigation';
+import { OfflineBanner } from './OfflineBanner';
+import { UpdateBanner } from './UpdateBanner';
 
 interface AppLayoutProps {
     children: ReactNode;
@@ -38,6 +40,9 @@ export function AppLayout({
                 backgroundColor: isDark ? colors.neutral[950] : colors.neutral[100],
             }}
         >
+            {/* Offline Banner */}
+            <OfflineBanner />
+
             {/* Header */}
             {showHeader && (
                 <Header
@@ -61,6 +66,9 @@ export function AppLayout({
 
             {/* Bottom Navigation */}
             {showBottomNav && <BottomNavigation />}
+
+            {/* Update Banner */}
+            <UpdateBanner />
         </div>
     );
 }
