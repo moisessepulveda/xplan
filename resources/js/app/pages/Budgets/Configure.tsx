@@ -12,13 +12,21 @@ interface UnclosedPeriod {
     label: string;
 }
 
+interface CreditsInfo {
+    monthly_total: number;
+    active_count: number;
+    category_id: number | null;
+    category_name: string | null;
+}
+
 interface Props {
     budget: Budget | null;
     categories: Category[];
     unclosedPeriods: UnclosedPeriod[];
+    creditsInfo: CreditsInfo;
 }
 
-export default function BudgetsConfigure({ budget, categories, unclosedPeriods = [] }: Props) {
+export default function BudgetsConfigure({ budget, categories, unclosedPeriods = [], creditsInfo }: Props) {
     const { processing } = useForm();
     const [closingPeriod, setClosingPeriod] = useState<UnclosedPeriod | null>(null);
     const [isClosing, setIsClosing] = useState(false);
@@ -143,6 +151,7 @@ export default function BudgetsConfigure({ budget, categories, unclosedPeriods =
                     processing={processing}
                     onSubmit={handleSubmit}
                     disabled={hasUnclosedPeriods && !!budget}
+                    creditsInfo={creditsInfo}
                 />
             </div>
 

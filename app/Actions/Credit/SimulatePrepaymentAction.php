@@ -15,9 +15,15 @@ class SimulatePrepaymentAction
     {
         $remainingMonths = $credit->pending_installments_count ?: $credit->term_months;
 
+        // Always pass annual rate to the calculator
+        $annualRate = (float) $credit->interest_rate;
+        if ($credit->interest_rate_type === 'monthly') {
+            $annualRate = $annualRate * 12;
+        }
+
         return $this->calculator->simulatePrepayment(
             (float) $credit->pending_amount,
-            (float) $credit->interest_rate,
+            $annualRate,
             $remainingMonths,
             $amount,
             $strategy,

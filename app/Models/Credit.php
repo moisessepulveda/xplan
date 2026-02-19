@@ -27,6 +27,7 @@ class Credit extends Model
         'pending_amount',
         'currency',
         'interest_rate',
+        'interest_rate_type',
         'rate_type',
         'term_months',
         'start_date',
@@ -116,6 +117,24 @@ class Credit extends Model
     public function getTotalInterestAttribute(): float
     {
         return (float) $this->installments()->sum('interest');
+    }
+
+    public function getMonthlyInterestRateAttribute(): float
+    {
+        $rate = (float) $this->interest_rate;
+        if ($this->interest_rate_type === 'annual') {
+            return $rate / 12;
+        }
+        return $rate;
+    }
+
+    public function getAnnualInterestRateAttribute(): float
+    {
+        $rate = (float) $this->interest_rate;
+        if ($this->interest_rate_type === 'monthly') {
+            return $rate * 12;
+        }
+        return $rate;
     }
 
     public function isCreditCard(): bool

@@ -10,6 +10,7 @@ interface CreditFormData {
     account_id?: number;
     original_amount: number;
     interest_rate: number;
+    interest_rate_type: 'annual' | 'monthly';
     rate_type: string;
     term_months: number;
     start_date: string;
@@ -146,21 +147,33 @@ export function CreditForm({
                         </Form.Item>
 
                         <Form.Item
-                            label="Tasa de interés anual (%)"
+                            label="Tasa de interés (%)"
                             required
                             validateStatus={errors.interest_rate ? 'error' : undefined}
                             help={errors.interest_rate}
                         >
-                            <InputNumber
-                                value={data.interest_rate}
-                                onChange={(value) => setData('interest_rate', value || 0)}
-                                min={0}
-                                max={100}
-                                step={0.1}
-                                style={{ width: '100%' }}
-                                size="large"
-                                addonAfter="%"
-                            />
+                            <div style={{ display: 'flex', gap: 8 }}>
+                                <InputNumber
+                                    value={data.interest_rate}
+                                    onChange={(value) => setData('interest_rate', value || 0)}
+                                    min={0}
+                                    max={100}
+                                    step={0.1}
+                                    style={{ flex: 1 }}
+                                    size="large"
+                                    addonAfter="%"
+                                />
+                                <Select
+                                    value={data.interest_rate_type}
+                                    onChange={(value) => setData('interest_rate_type', value)}
+                                    style={{ width: 120 }}
+                                    size="large"
+                                    options={[
+                                        { value: 'annual', label: 'Anual' },
+                                        { value: 'monthly', label: 'Mensual' },
+                                    ]}
+                                />
+                            </div>
                         </Form.Item>
 
                         <Form.Item label="Tipo de tasa">

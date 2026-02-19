@@ -21,6 +21,7 @@ class UpdateCreditRequest extends FormRequest
             'entity' => ['nullable', 'string', 'max:255'],
             'account_id' => ['nullable', 'integer', 'exists:accounts,id'],
             'interest_rate' => ['sometimes', 'numeric', 'min:0', 'max:100'],
+            'interest_rate_type' => ['sometimes', 'string', 'in:annual,monthly'],
             'rate_type' => ['sometimes', 'string', 'in:fixed,variable'],
             'payment_day' => ['sometimes', 'integer', 'min:1', 'max:31'],
             'monthly_payment' => ['nullable', 'numeric', 'min:0'],

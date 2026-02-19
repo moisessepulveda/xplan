@@ -23,6 +23,7 @@ class StoreCreditRequest extends FormRequest
             'original_amount' => ['required', 'numeric', 'min:0.01'],
             'currency' => ['nullable', 'string', 'size:3'],
             'interest_rate' => ['required', 'numeric', 'min:0', 'max:100'],
+            'interest_rate_type' => ['sometimes', 'string', 'in:annual,monthly'],
             'rate_type' => ['sometimes', 'string', 'in:fixed,variable'],
             'term_months' => ['required', 'integer', 'min:1', 'max:600'],
             'start_date' => ['required', 'date'],

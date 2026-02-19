@@ -57,7 +57,7 @@ export default function CreditsAmortization({ credit }: Props) {
                     display: 'flex',
                     justifyContent: 'space-between',
                     padding: 12,
-                    backgroundColor: '#f5f5f5',
+                    backgroundColor: 'var(--ant-color-fill-tertiary)',
                     borderRadius: 8,
                     marginBottom: 16,
                     fontSize: 12,

@@ -20,6 +20,7 @@ export default function CreditsEdit({ credit, creditTypes, accounts }: Props) {
         account_id: credit.account_id,
         original_amount: credit.original_amount,
         interest_rate: credit.interest_rate,
+        interest_rate_type: (credit.interest_rate_type || 'annual') as 'annual' | 'monthly',
         rate_type: credit.rate_type,
         term_months: credit.term_months,
         start_date: credit.start_date,

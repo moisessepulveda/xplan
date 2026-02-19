@@ -20,6 +20,7 @@ class CategoryResource extends JsonResource
             'icon' => $this->icon,
             'color' => $this->color,
             'is_system' => $this->is_system,
+            'system_type' => $this->system_type,
             'is_archived' => $this->is_archived,
             'order' => $this->order,
             'children' => CategoryResource::collection($this->whenLoaded('children')),

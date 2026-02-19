@@ -52,7 +52,7 @@ export function PayInstallmentForm({
             okButtonProps={{ disabled: !accountId || !amount }}
         >
             {installment && (
-                <div style={{ marginBottom: 16, padding: 12, backgroundColor: '#f5f5f5', borderRadius: 8 }}>
+                <div style={{ marginBottom: 16, padding: 12, backgroundColor: 'var(--ant-color-fill-tertiary)', borderRadius: 8 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Typography.Text type="secondary">Monto de la cuota</Typography.Text>
                         <Typography.Text strong>{formatCurrency(installment.amount)}</Typography.Text>

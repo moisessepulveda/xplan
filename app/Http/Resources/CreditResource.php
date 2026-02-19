@@ -25,6 +25,7 @@ class CreditResource extends JsonResource
             'progress' => $this->progress,
             'currency' => $this->currency,
             'interest_rate' => (float) $this->interest_rate,
+            'interest_rate_type' => $this->interest_rate_type ?? 'annual',
             'rate_type' => $this->rate_type,
             'term_months' => $this->term_months,
             'start_date' => $this->start_date->format('Y-m-d'),

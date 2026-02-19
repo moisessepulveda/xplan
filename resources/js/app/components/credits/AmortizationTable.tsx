@@ -18,7 +18,7 @@ export function AmortizationTable({ installments, formatCurrency, onPayClick }: 
         <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
                 <thead>
-                    <tr style={{ backgroundColor: '#fafafa', borderBottom: '2px solid #f0f0f0' }}>
+                    <tr style={{ backgroundColor: 'var(--ant-color-fill-quaternary)', borderBottom: '2px solid var(--ant-color-border)' }}>
                         <th style={{ padding: '8px 6px', textAlign: 'left' }}>#</th>
                         <th style={{ padding: '8px 6px', textAlign: 'left' }}>Vencimiento</th>
                         <th style={{ padding: '8px 6px', textAlign: 'right' }}>Capital</th>
@@ -32,8 +32,12 @@ export function AmortizationTable({ installments, formatCurrency, onPayClick }: 
                         <tr
                             key={inst.id}
                             style={{
-                                borderBottom: '1px solid #f5f5f5',
-                                backgroundColor: inst.status === 'paid' ? '#f6ffed' : inst.is_overdue ? '#fff2f0' : 'transparent',
+                                borderBottom: '1px solid var(--ant-color-border-secondary)',
+                                backgroundColor: inst.status === 'paid'
+                                    ? 'var(--ant-color-success-bg)'
+                                    : inst.is_overdue
+                                    ? 'var(--ant-color-error-bg)'
+                                    : 'transparent',
                                 cursor: onPayClick && inst.status !== 'paid' ? 'pointer' : 'default',
                             }}
                             onClick={() => {

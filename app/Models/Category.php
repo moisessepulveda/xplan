@@ -25,6 +25,7 @@ class Category extends Model
         'icon',
         'color',
         'is_system',
+        'system_type',
         'is_archived',
         'order',
     ];
@@ -73,6 +74,16 @@ class Category extends Model
     public function scopeExpense($query)
     {
         return $query->where('type', CategoryType::EXPENSE);
+    }
+
+    public function scopeSystemType($query, string $systemType)
+    {
+        return $query->where('system_type', $systemType);
+    }
+
+    public function scopeCredits($query)
+    {
+        return $query->systemType('credits');
     }
 
     public function archive(): void

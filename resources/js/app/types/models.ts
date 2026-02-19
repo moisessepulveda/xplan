@@ -143,6 +143,7 @@ export interface Category {
   icon?: string;
   color?: string;
   is_system: boolean;
+  system_type?: string | null;
   is_archived: boolean;
   order: number;
   children?: Category[];
@@ -406,6 +407,7 @@ export interface Credit {
   progress: number;
   currency: string;
   interest_rate: number;
+  interest_rate_type: 'annual' | 'monthly';
   rate_type: 'fixed' | 'variable';
   term_months: number;
   start_date: string;

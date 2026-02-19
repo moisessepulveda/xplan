@@ -17,6 +17,7 @@ export default function CreditsCreate({ creditTypes, accounts }: Props) {
         account_id: undefined as number | undefined,
         original_amount: 0,
         interest_rate: 0,
+        interest_rate_type: 'annual' as 'annual' | 'monthly',
         rate_type: 'fixed',
         term_months: 12,
         start_date: new Date().toISOString().split('T')[0],

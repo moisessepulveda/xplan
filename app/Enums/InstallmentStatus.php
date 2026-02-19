@@ -22,9 +22,9 @@ enum InstallmentStatus: string
     public function color(): string
     {
         return match ($this) {
-            self::PENDING => '#faad14',
+            self::PENDING => '#fa541c',
             self::PAID => '#52c41a',
-            self::OVERDUE => '#ff4d4f',
+            self::OVERDUE => '#f5222d',
             self::PARTIAL => '#1677ff',
         };
     }

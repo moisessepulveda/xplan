@@ -16,10 +16,12 @@ class AmortizationCalculator
         Carbon $startDate,
         int $paymentDay = 1,
         float $insurance = 0,
-        float $otherCharges = 0
+        float $otherCharges = 0,
+        ?float $fixedMonthlyPayment = null,
+        int $precision = 0
     ): array {
         $monthlyRate = $annualRate / 100 / 12;
-        $monthlyPayment = $this->calculateMonthlyPayment($principal, $monthlyRate, $termMonths);
+        $monthlyPayment = $fixedMonthlyPayment ?? round($this->calculateMonthlyPayment($principal, $monthlyRate, $termMonths), $precision);
 
         $installments = [];
         $remainingPrincipal = $principal;
@@ -40,9 +42,9 @@ class AmortizationCalculator
             $installments[] = [
                 'number' => $i,
                 'due_date' => $dueDate->format('Y-m-d'),
-                'amount' => round($monthlyPayment + $insurance + $otherCharges, 2),
-                'principal' => round($principalPayment, 2),
-                'interest' => round($interestPayment, 2),
+                'amount' => round($monthlyPayment + $insurance + $otherCharges, $precision),
+                'principal' => round($principalPayment, $precision),
+                'interest' => round($interestPayment, $precision),
                 'insurance' => $insurance,
                 'other_charges' => $otherCharges,
             ];

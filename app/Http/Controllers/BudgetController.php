@@ -12,6 +12,7 @@ use App\Http\Resources\BudgetResource;
 use App\Models\Budget;
 use App\Models\BudgetHistory;
 use App\Models\Category;
+use App\Models\Credit;
 use App\Services\BudgetCalculator;
 use App\Services\BudgetSnapshotService;
 use Illuminate\Http\RedirectResponse;
@@ -76,10 +77,25 @@ class BudgetController extends Controller
                 ->toArray();
         }
 
+        // Calculate total monthly credits payment
+        $creditsMonthlyTotal = Credit::active()
+            ->sum('monthly_payment');
+
+        $activeCreditsCount = Credit::active()->count();
+
+        // Get credits system category
+        $creditsCategory = Category::credits()->first();
+
         return Inertia::render('Budgets/Configure', [
             'budget' => $budget ? new BudgetResource($budget) : null,
             'categories' => \App\Http\Resources\CategoryResource::collection($categories),
             'unclosedPeriods' => $unclosedPeriods,
+            'creditsInfo' => [
+                'monthly_total' => (float) $creditsMonthlyTotal,
+                'active_count' => $activeCreditsCount,
+                'category_id' => $creditsCategory?->id,
+                'category_name' => $creditsCategory?->name,
+            ],
         ]);
     }
 
