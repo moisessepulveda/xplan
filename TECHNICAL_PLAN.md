@@ -1906,7 +1906,7 @@ export default function TransactionsIndex({
 
 ## Fases de Implementación
 
-### Fase 1: Fundamentos (Semana 1-2)
+### Fase 1: Fundamentos (Semana 1-2) ✅ COMPLETADA
 
 #### Objetivos
 - Configuración del proyecto
@@ -1916,48 +1916,48 @@ export default function TransactionsIndex({
 #### Tareas
 
 **Backend**
-- [ ] Crear proyecto Laravel 11
-- [ ] Configurar PostgreSQL
-- [ ] Instalar y configurar Inertia.js 2
-- [ ] Instalar Sanctum para autenticación
-- [ ] Crear migraciones: `users`, `plannings`, `planning_members`, `invitations`
-- [ ] Crear modelos base con relaciones
-- [ ] Crear Enums: `MemberRole`, `InvitationStatus`
-- [ ] Implementar middleware `HandleInertiaRequests`
-- [ ] Implementar middleware `EnsureActivePlanning`
-- [ ] Crear Actions de Auth:
+- [x] Crear proyecto Laravel 11
+- [x] Configurar PostgreSQL
+- [x] Instalar y configurar Inertia.js 2
+- [x] Instalar Sanctum para autenticación
+- [x] Crear migraciones: `users`, `plannings`, `planning_members`, `invitations`
+- [x] Crear modelos base con relaciones
+- [x] Crear Enums: `MemberRole`, `InvitationStatus`
+- [x] Implementar middleware `HandleInertiaRequests`
+- [x] Implementar middleware `EnsureActivePlanning`
+- [x] Crear Actions de Auth:
   - `RegisterUserAction`
   - `LoginUserAction`
   - `ResetPasswordAction`
-- [ ] Crear Actions de Planning:
+- [x] Crear Actions de Planning:
   - `CreatePlanningAction`
   - `UpdatePlanningAction`
   - `SwitchActivePlanningAction`
-- [ ] Crear Requests de validación
-- [ ] Crear Controllers de Auth y Planning
-- [ ] Configurar rutas
+- [x] Crear Requests de validación
+- [x] Crear Controllers de Auth y Planning
+- [x] Configurar rutas
 
 **Frontend**
-- [ ] Configurar Vite + React + TypeScript
-- [ ] Instalar y configurar Ant Design 5
-- [ ] Configurar sistema de temas (light/dark)
-- [ ] Crear estructura de carpetas
-- [ ] Implementar `ThemeContext` y `ThemeProvider`
-- [ ] Implementar `AuthContext`
-- [ ] Implementar `PlanningContext`
-- [ ] Crear layouts: `AuthLayout`, `AppLayout`
-- [ ] Crear componentes comunes:
+- [x] Configurar Vite + React + TypeScript
+- [x] Instalar y configurar Ant Design 5
+- [x] Configurar sistema de temas (light/dark)
+- [x] Crear estructura de carpetas
+- [x] Implementar `ThemeContext` y `ThemeProvider`
+- [x] Implementar `AuthContext`
+- [x] Implementar `PlanningContext`
+- [x] Crear layouts: `AuthLayout`, `AppLayout`
+- [x] Crear componentes comunes:
   - `BottomNavigation`
   - `Header`
   - `PlanningSelector`
-- [ ] Crear páginas de Auth:
+- [x] Crear páginas de Auth:
   - `Login`
   - `Register`
   - `ForgotPassword`
-- [ ] Crear páginas de Onboarding:
+- [x] Crear páginas de Onboarding:
   - `Welcome`
   - `CreatePlanning`
-- [ ] Crear página `Plannings/Index`
+- [x] Crear página `Plannings/Index`
 
 **Entregables**
 - Usuario puede registrarse e iniciar sesión
@@ -1967,7 +1967,7 @@ export default function TransactionsIndex({
 
 ---
 
-### Fase 2: Cuentas y Categorías (Semana 3)
+### Fase 2: Cuentas y Categorías (Semana 3) ✅ COMPLETADA
 
 #### Objetivos
 - CRUD completo de cuentas
@@ -1977,38 +1977,38 @@ export default function TransactionsIndex({
 #### Tareas
 
 **Backend**
-- [ ] Crear migraciones: `accounts`, `categories`
-- [ ] Crear modelos con traits `BelongsToPlanning`
-- [ ] Crear Enums: `AccountType`, `CategoryType`
-- [ ] Crear Service: `BalanceCalculator`
-- [ ] Crear Actions de Account:
+- [x] Crear migraciones: `accounts`, `categories`
+- [x] Crear modelos con traits `BelongsToPlanning`
+- [x] Crear Enums: `AccountType`, `CategoryType`
+- [x] Crear Service: `BalanceCalculator`
+- [x] Crear Actions de Account:
   - `CreateAccountAction`
   - `UpdateAccountAction`
   - `AdjustBalanceAction`
   - `TransferBetweenAccountsAction`
-- [ ] Crear Actions de Category:
+- [x] Crear Actions de Category:
   - `CreateCategoryAction`
   - `UpdateCategoryAction`
   - `ReorderCategoriesAction`
-- [ ] Crear Requests de validación
-- [ ] Crear Resources: `AccountResource`, `CategoryResource`
-- [ ] Crear Controllers
-- [ ] Crear Seeder: `DefaultCategoriesSeeder`
-- [ ] Crear Policy: `AccountPolicy`, `CategoryPolicy`
+- [x] Crear Requests de validación
+- [x] Crear Resources: `AccountResource`, `CategoryResource`
+- [x] Crear Controllers
+- [x] Crear Seeder: `DefaultCategoriesSeeder`
+- [x] Crear Policy: `AccountPolicy`, `CategoryPolicy`
 
 **Frontend**
-- [ ] Crear componentes de Account:
+- [x] Crear componentes de Account:
   - `AccountList`
   - `AccountCard`
   - `AccountForm`
   - `AccountDetail`
   - `AdjustBalanceModal`
-- [ ] Crear componentes de Category:
+- [x] Crear componentes de Category:
   - `CategoryList`
   - `CategoryTree`
   - `CategoryForm`
   - `CategoryItem`
-- [ ] Crear páginas:
+- [x] Crear páginas:
   - `Accounts/Index`
   - `Accounts/Create`
   - `Accounts/Edit`
@@ -2016,7 +2016,7 @@ export default function TransactionsIndex({
   - `Categories/Index`
   - `Categories/Create`
   - `Categories/Edit`
-- [ ] Integrar en onboarding: `AddFirstAccount`
+- [x] Integrar en onboarding: `AddFirstAccount`
 
 **Entregables**
 - Usuario puede crear/editar/archivar cuentas
