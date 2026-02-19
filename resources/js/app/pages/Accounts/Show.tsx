@@ -134,7 +134,7 @@ export default function ShowAccount({ account, transactions }: Props) {
         <AppLayout
             title={account.name}
             showBack
-            extra={
+            headerRight={
                 <Dropdown menu={{ items: menuItems }} trigger={['click']}>
                     <Button type="text" icon={<MoreOutlined />} />
                 </Dropdown>
