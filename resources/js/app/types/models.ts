@@ -496,3 +496,130 @@ export interface Notification {
   read_at?: string;
   created_at: string;
 }
+
+// Dashboard & Reports
+export interface DashboardStats {
+  total_balance: number;
+  month_income: number;
+  month_expense: number;
+  month_balance: number;
+  total_debt: number;
+  total_receivable: number;
+  budget_used: number;
+  budget_total: number;
+  budget_spent: number;
+}
+
+export interface QuickStats {
+  expense_change: number;
+  transaction_count: number;
+  accounts_count: number;
+  active_credits_count: number;
+}
+
+export interface UpcomingPayment {
+  id: number;
+  type: 'credit_installment' | 'payable';
+  description: string;
+  amount: number;
+  due_date: string | null;
+  status: string;
+  is_overdue: boolean;
+}
+
+export interface ExpenseByCategoryItem {
+  category_id: number;
+  category_name: string;
+  category_icon?: string;
+  category_color?: string;
+  total: number;
+  percentage: number;
+}
+
+export interface ExpensesByCategoryReport {
+  data: ExpenseByCategoryItem[];
+  total: number;
+  start_date: string;
+  end_date: string;
+}
+
+export interface IncomeVsExpensesMonth {
+  month: string;
+  month_label: string;
+  income: number;
+  expense: number;
+  balance: number;
+}
+
+export interface IncomeVsExpensesReport {
+  data: IncomeVsExpensesMonth[];
+  total_income: number;
+  total_expense: number;
+  average_income: number;
+  average_expense: number;
+}
+
+export interface CashFlowDay {
+  date: string;
+  date_label: string;
+  income: number;
+  expense: number;
+  net: number;
+  accumulated: number;
+}
+
+export interface CashFlowReport {
+  data: CashFlowDay[];
+  total_income: number;
+  total_expense: number;
+  net_flow: number;
+  start_date: string;
+  end_date: string;
+}
+
+export interface BudgetVsRealLine {
+  category_id: number;
+  category_name: string;
+  category_icon?: string;
+  category_color?: string;
+  budgeted: number;
+  spent: number;
+  remaining: number;
+  percentage: number;
+  status: string;
+}
+
+export interface BudgetVsRealReport {
+  has_budget: boolean;
+  data: BudgetVsRealLine[];
+  total_budgeted: number;
+  total_spent: number;
+  total_remaining: number;
+  total_percentage: number;
+  period?: string;
+}
+
+export interface DebtByType {
+  type: string;
+  type_label: string;
+  type_color: string;
+  count: number;
+  total_debt: number;
+  total_monthly: number;
+}
+
+export interface DebtReport {
+  credits: {
+    count: number;
+    total_debt: number;
+    total_monthly_payment: number;
+    total_interest: number;
+    by_type: DebtByType[];
+  };
+  payables: {
+    count: number;
+    total_amount: number;
+    overdue_count: number;
+  };
+  total_debt: number;
+}

@@ -2,30 +2,31 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\TransactionResource;
+use App\Services\ReportGenerator;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    /**
-     * Display the dashboard.
-     */
+    public function __construct(private ReportGenerator $reportGenerator) {}
+
     public function index(Request $request): Response
     {
         $user = $request->user();
-        $planning = $user->activePlanning;
+        $planningId = $user->active_planning_id;
 
-        // For Phase 1, we just show basic info
-        // More data will be added in later phases
+        $stats = $this->reportGenerator->getDashboardStats($planningId);
+        $upcomingPayments = $this->reportGenerator->getUpcomingPayments($planningId, 5);
+        $quickStats = $this->reportGenerator->getQuickStats($planningId);
+        $recentTransactions = $this->reportGenerator->getRecentTransactions($planningId, 5);
 
         return Inertia::render('Dashboard/Index', [
-            'stats' => [
-                'total_balance' => 0,
-                'month_income' => 0,
-                'month_expense' => 0,
-                'budget_used' => 0,
-            ],
+            'stats' => $stats,
+            'upcomingPayments' => $upcomingPayments,
+            'quickStats' => $quickStats,
+            'recentTransactions' => TransactionResource::collection($recentTransactions),
         ]);
     }
 }

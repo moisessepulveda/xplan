@@ -13,6 +13,7 @@ use App\Http\Controllers\CreditController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ReceivableController;
+use App\Http\Controllers\ReportController;
 use App\Http\Middleware\EnsureActivePlanning;
 use Illuminate\Support\Facades\Route;
 
@@ -128,5 +129,14 @@ Route::middleware('auth')->group(function () {
         Route::post('receivables/{receivable}/payment', [ReceivableController::class, 'registerPayment'])->name('receivables.payment');
         Route::post('receivables/{receivable}/cancel', [ReceivableController::class, 'cancel'])->name('receivables.cancel');
         Route::post('receivables/{receivable}/reminder', [ReceivableController::class, 'addReminder'])->name('receivables.reminder');
+
+        // Reports (Reportes)
+        Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/expenses-by-category', [ReportController::class, 'expensesByCategory'])->name('reports.expenses-by-category');
+        Route::get('reports/income-vs-expenses', [ReportController::class, 'incomeVsExpenses'])->name('reports.income-vs-expenses');
+        Route::get('reports/cash-flow', [ReportController::class, 'cashFlow'])->name('reports.cash-flow');
+        Route::get('reports/debts', [ReportController::class, 'debts'])->name('reports.debts');
+        Route::get('reports/budget-vs-real', [ReportController::class, 'budgetVsReal'])->name('reports.budget-vs-real');
+        Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
     });
 });
