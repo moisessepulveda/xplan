@@ -194,23 +194,53 @@ export interface RecurringTransaction {
 
 export interface Receivable {
   id: number;
-  planning_id: number;
+  planning_id?: number;
   type: ReceivableType;
+  type_label: string;
+  type_color: string;
+  status: ReceivableStatus;
+  status_label: string;
+  status_color: string;
   person_name: string;
   person_contact?: string;
   original_amount: number;
   pending_amount: number;
+  paid_amount: number;
+  progress: number;
   currency: string;
   concept: string;
   due_date?: string;
-  status: ReceivableStatus;
+  is_overdue: boolean;
   notes?: string;
+  created_by: number;
   created_at: string;
+  updated_at: string;
   payments?: ReceivablePayment[];
+  reminders?: Reminder[];
 }
 
 export type ReceivableType = 'receivable' | 'payable';
 export type ReceivableStatus = 'pending' | 'partial' | 'paid' | 'cancelled';
+
+export interface ReceivableTypeOption {
+  value: ReceivableType;
+  label: string;
+  color: string;
+  icon: string;
+}
+
+export interface ReceivableStatusOption {
+  value: ReceivableStatus;
+  label: string;
+  color: string;
+}
+
+export interface ReceivableSummary {
+  total_receivable: number;
+  total_payable: number;
+  net_balance: number;
+  overdue_count: number;
+}
 
 export interface ReceivablePayment {
   id: number;
@@ -218,7 +248,20 @@ export interface ReceivablePayment {
   amount: number;
   date: string;
   account_id: number;
+  transaction_id?: number;
   notes?: string;
+  registered_by: number;
+  account?: Account;
+  created_at: string;
+}
+
+export interface Reminder {
+  id: number;
+  receivable_id: number;
+  remind_at: string;
+  message?: string;
+  sent: boolean;
+  sent_at?: string;
 }
 
 export interface Budget {

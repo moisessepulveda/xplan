@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\ReceivableController;
 use App\Http\Middleware\EnsureActivePlanning;
 use Illuminate\Support\Facades\Route;
 
@@ -84,5 +85,11 @@ Route::middleware('auth')->group(function () {
         Route::resource('transactions', TransactionController::class);
         Route::post('transactions/{transaction}/duplicate', [TransactionController::class, 'duplicate'])->name('transactions.duplicate');
         Route::get('transactions-recurring', [TransactionController::class, 'recurring'])->name('transactions.recurring');
+
+        // Receivables (Cuentas Pendientes)
+        Route::resource('receivables', ReceivableController::class);
+        Route::post('receivables/{receivable}/payment', [ReceivableController::class, 'registerPayment'])->name('receivables.payment');
+        Route::post('receivables/{receivable}/cancel', [ReceivableController::class, 'cancel'])->name('receivables.cancel');
+        Route::post('receivables/{receivable}/reminder', [ReceivableController::class, 'addReminder'])->name('receivables.reminder');
     });
 });
