@@ -10,6 +10,7 @@ export interface PageProps {
   };
   planning: Planning | null;
   plannings: Planning[];
+  unreadNotificationsCount: number;
   flash: {
     success?: string;
     error?: string;

@@ -1,11 +1,12 @@
 import React, { ReactNode } from 'react';
 import { Typography, Button, Badge } from 'antd';
 import { ArrowLeftOutlined, BellOutlined } from '@ant-design/icons';
-import { router } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { useTheme } from '@/app/contexts/ThemeContext';
 import { usePlanning } from '@/app/hooks/usePlanning';
 import { colors } from '@/app/styles/theme';
 import { PlanningSelector } from './PlanningSelector';
+import type { PageProps } from '@/app/types';
 
 interface HeaderProps {
     title?: string;
@@ -17,6 +18,7 @@ interface HeaderProps {
 export function Header({ title, showBack, onBack, rightContent }: HeaderProps) {
     const { isDark } = useTheme();
     const { planning } = usePlanning();
+    const { unreadNotificationsCount } = usePage<PageProps>().props;
 
     const handleBack = () => {
         if (onBack) {
@@ -67,7 +69,7 @@ export function Header({ title, showBack, onBack, rightContent }: HeaderProps) {
                 <Button
                     type="text"
                     icon={
-                        <Badge count={0} size="small">
+                        <Badge count={unreadNotificationsCount || 0} size="small">
                             <BellOutlined style={{ fontSize: 20 }} />
                         </Badge>
                     }

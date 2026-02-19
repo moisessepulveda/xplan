@@ -16,6 +16,11 @@ export interface UserSettings {
   date_format?: string;
   locale?: string;
   theme?: 'light' | 'dark' | 'system';
+  notifications_enabled?: boolean;
+  notification_budget_alerts?: boolean;
+  notification_due_dates?: boolean;
+  notification_overdue?: boolean;
+  notification_members?: boolean;
 }
 
 export interface Planning {

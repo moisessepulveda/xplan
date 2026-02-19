@@ -12,8 +12,10 @@ use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\CreditController;
 use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReceivableController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Middleware\EnsureActivePlanning;
 use Illuminate\Support\Facades\Route;
 
@@ -138,5 +140,20 @@ Route::middleware('auth')->group(function () {
         Route::get('reports/debts', [ReportController::class, 'debts'])->name('reports.debts');
         Route::get('reports/budget-vs-real', [ReportController::class, 'budgetVsReal'])->name('reports.budget-vs-real');
         Route::get('reports/export', [ReportController::class, 'export'])->name('reports.export');
+
+        // Notifications (Notificaciones)
+        Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+        Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+        Route::delete('notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+        Route::delete('notifications', [NotificationController::class, 'destroyAll'])->name('notifications.destroy-all');
+
+        // Settings (Configuración)
+        Route::get('settings', [SettingsController::class, 'index'])->name('settings.index');
+        Route::get('settings/profile', [SettingsController::class, 'profile'])->name('settings.profile');
+        Route::put('settings/profile', [SettingsController::class, 'updateProfile'])->name('settings.update-profile');
+        Route::put('settings/password', [SettingsController::class, 'updatePassword'])->name('settings.update-password');
+        Route::get('settings/preferences', [SettingsController::class, 'preferences'])->name('settings.preferences');
+        Route::put('settings/preferences', [SettingsController::class, 'updatePreferences'])->name('settings.update-preferences');
     });
 });

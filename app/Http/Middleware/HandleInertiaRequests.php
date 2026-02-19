@@ -48,6 +48,10 @@ class HandleInertiaRequests extends Middleware
                 ? PlanningResource::collection($request->user()->plannings)
                 : [],
 
+            'unreadNotificationsCount' => fn () => $request->user()
+                ? $request->user()->unreadNotifications()->count()
+                : 0,
+
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
