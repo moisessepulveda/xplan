@@ -13,10 +13,11 @@ import {
     SyncOutlined,
     LeftOutlined,
     RightOutlined,
+    CreditCardOutlined,
 } from '@ant-design/icons';
 import * as Icons from '@ant-design/icons';
 import { AppLayout } from '@/app/components/common/AppLayout';
-import { TransactionList, TransactionFilters, RecurringPendingItem } from '@/app/components/transactions';
+import { TransactionList, TransactionFilters, RecurringPendingItem, InstallmentPendingItem } from '@/app/components/transactions';
 import {
     Transaction,
     RecurringTransaction,
@@ -25,6 +26,7 @@ import {
     Account,
     Category,
     PaginatedData,
+    PendingInstallment,
 } from '@/app/types';
 import { usePlanning } from '@/app/hooks/usePlanning';
 import { colors } from '@/app/styles/theme';
@@ -33,6 +35,7 @@ interface Props {
     transactions: PaginatedData<Transaction>;
     pendingTransactions: Transaction[];
     pendingRecurring: RecurringTransaction[];
+    pendingInstallments: PendingInstallment[];
     filters: Record<string, string | number>;
     period: string;
     summary: TransactionSummary;
@@ -54,6 +57,7 @@ export default function TransactionsIndex({
     transactions,
     pendingTransactions,
     pendingRecurring,
+    pendingInstallments,
     filters,
     period,
     summary,
@@ -66,6 +70,7 @@ export default function TransactionsIndex({
     const [searchValue, setSearchValue] = useState(filters.search as string || '');
     const [processingId, setProcessingId] = useState<number | null>(null);
     const [processingRecurringId, setProcessingRecurringId] = useState<number | null>(null);
+    const [processingInstallmentId, setProcessingInstallmentId] = useState<number | null>(null);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-CL', {
@@ -316,6 +321,41 @@ export default function TransactionsIndex({
                     </Card>
                 )}
 
+                {/* Pending Installments */}
+                {pendingInstallments && pendingInstallments.length > 0 && (
+                    <Card
+                        size="small"
+                        title={
+                            <Space>
+                                <CreditCardOutlined style={{ color: colors.error[500] }} />
+                                <span>Cuotas de créditos del mes</span>
+                                <Tag color="error">{pendingInstallments.length}</Tag>
+                            </Space>
+                        }
+                        extra={
+                            <Button
+                                type="link"
+                                size="small"
+                                onClick={() => router.visit('/credits')}
+                            >
+                                Ver créditos
+                            </Button>
+                        }
+                        style={{ marginBottom: 16 }}
+                    >
+                        <List
+                            dataSource={pendingInstallments}
+                            renderItem={(installment) => (
+                                <InstallmentPendingItem
+                                    installment={installment}
+                                    accounts={accounts}
+                                    processing={processingInstallmentId === installment.id}
+                                />
+                            )}
+                        />
+                    </Card>
+                )}
+
                 {/* Pending Transactions */}
                 {pendingTransactions && pendingTransactions.length > 0 && (
                     <Card
@@ -428,7 +468,7 @@ export default function TransactionsIndex({
                 <div style={{ marginBottom: 16 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                         <Typography.Title level={5} style={{ margin: 0 }}>
-                            Transacciones ({transactions.total})
+                            Transacciones ({transactions.meta.total})
                         </Typography.Title>
                     </div>
                     <TransactionList
@@ -439,18 +479,18 @@ export default function TransactionsIndex({
                 </div>
 
                 {/* Pagination */}
-                {transactions.last_page > 1 && (
+                {transactions.meta.last_page > 1 && (
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 16 }}>
-                        {transactions.prev_page_url && (
-                            <Button onClick={() => router.visit(transactions.prev_page_url!)}>
+                        {transactions.links.prev && (
+                            <Button onClick={() => router.visit(transactions.links.prev!)}>
                                 Anterior
                             </Button>
                         )}
                         <Typography.Text type="secondary" style={{ lineHeight: '32px' }}>
-                            Página {transactions.current_page} de {transactions.last_page}
+                            Página {transactions.meta.current_page} de {transactions.meta.last_page}
                         </Typography.Text>
-                        {transactions.next_page_url && (
-                            <Button onClick={() => router.visit(transactions.next_page_url!)}>
+                        {transactions.links.next && (
+                            <Button onClick={() => router.visit(transactions.links.next!)}>
                                 Siguiente
                             </Button>
                         )}

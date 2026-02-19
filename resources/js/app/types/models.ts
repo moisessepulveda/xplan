@@ -469,6 +469,21 @@ export interface CreditInstallment {
 
 export type InstallmentStatus = 'pending' | 'paid' | 'overdue' | 'partial';
 
+export interface PendingInstallment {
+  id: number;
+  credit_id: number;
+  credit_name: string;
+  credit_entity?: string;
+  number: number;
+  due_date: string;
+  amount: number;
+  remaining_amount: number;
+  is_overdue: boolean;
+  status: InstallmentStatus;
+  status_label: string;
+  status_color: string;
+}
+
 export interface ExtraPayment {
   id: number;
   credit_id: number;

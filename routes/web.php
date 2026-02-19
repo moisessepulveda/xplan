@@ -108,6 +108,7 @@ Route::middleware('auth')->group(function () {
         Route::post('recurring/{recurring}/skip', [TransactionController::class, 'skipRecurring'])->name('recurring.skip');
         Route::post('recurring/{recurring}/toggle', [TransactionController::class, 'toggleRecurring'])->name('recurring.toggle');
         Route::delete('recurring/{recurring}', [TransactionController::class, 'destroyRecurring'])->name('recurring.destroy');
+        Route::post('installments/{installment}/pay', [TransactionController::class, 'payInstallment'])->name('installments.pay');
 
         // Budgets (Presupuestos)
         Route::get('budgets', [BudgetController::class, 'index'])->name('budgets.index');

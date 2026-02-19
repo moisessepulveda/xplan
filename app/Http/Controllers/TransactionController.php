@@ -11,14 +11,17 @@ use App\Enums\Frequency;
 use App\Http\Requests\Transaction\FilterTransactionsRequest;
 use App\Http\Requests\Transaction\StoreTransactionRequest;
 use App\Http\Requests\Transaction\UpdateTransactionRequest;
+use App\Http\Requests\Credit\PayInstallmentRequest;
 use App\Http\Resources\TransactionResource;
 use App\Http\Resources\RecurringTransactionResource;
 use App\Http\Resources\AccountResource;
 use App\Http\Resources\CategoryResource;
 use App\Models\Account;
 use App\Models\Category;
+use App\Models\CreditInstallment;
 use App\Models\RecurringTransaction;
 use App\Models\Transaction;
+use App\Actions\Credit\PayInstallmentAction;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -83,10 +86,37 @@ class TransactionController extends Controller
                 ->get();
         }
 
+        // Cuotas de créditos pendientes del mes seleccionado
+        $pendingInstallments = CreditInstallment::with(['credit'])
+            ->whereHas('credit', function ($q) {
+                $q->where('status', 'active');
+            })
+            ->pending()
+            ->whereBetween('due_date', [$monthStart->toDateString(), $monthEnd->toDateString()])
+            ->orderBy('due_date')
+            ->get()
+            ->map(function ($installment) {
+                return [
+                    'id' => $installment->id,
+                    'credit_id' => $installment->credit_id,
+                    'credit_name' => $installment->credit->name,
+                    'credit_entity' => $installment->credit->entity,
+                    'number' => $installment->number,
+                    'due_date' => $installment->due_date->format('Y-m-d'),
+                    'amount' => (float) $installment->amount,
+                    'remaining_amount' => (float) $installment->remaining_amount,
+                    'is_overdue' => $installment->isOverdue(),
+                    'status' => $installment->status->value,
+                    'status_label' => $installment->status->label(),
+                    'status_color' => $installment->status->color(),
+                ];
+            });
+
         return Inertia::render('Transactions/Index', [
             'transactions' => TransactionResource::collection($transactions),
             'pendingTransactions' => TransactionResource::collection($pendingTransactions),
             'pendingRecurring' => RecurringTransactionResource::collection($pendingRecurring),
+            'pendingInstallments' => $pendingInstallments,
             'filters' => $filters,
             'period' => $period,
             'summary' => [
@@ -302,5 +332,13 @@ class TransactionController extends Controller
 
         return redirect()->back()
             ->with('success', 'Transacción recurrente eliminada.');
+    }
+
+    public function payInstallment(PayInstallmentRequest $request, CreditInstallment $installment, PayInstallmentAction $action): RedirectResponse
+    {
+        $action->execute($installment, $request->validated());
+
+        return redirect()->back()
+            ->with('success', 'Cuota pagada exitosamente.');
     }
 }

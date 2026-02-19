@@ -225,18 +225,18 @@ export default function NotificationsIndex({ notifications, unreadCount }: Props
                 )}
 
                 {/* Pagination */}
-                {notifications.last_page > 1 && (
+                {notifications.meta.last_page > 1 && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16, gap: 8 }}>
-                        {notifications.prev_page_url && (
-                            <Button size="small" onClick={() => router.visit(notifications.prev_page_url!)}>
+                        {notifications.links.prev && (
+                            <Button size="small" onClick={() => router.visit(notifications.links.prev!)}>
                                 Anterior
                             </Button>
                         )}
                         <Typography.Text type="secondary" style={{ lineHeight: '32px', fontSize: 12 }}>
-                            {notifications.current_page} de {notifications.last_page}
+                            {notifications.meta.current_page} de {notifications.meta.last_page}
                         </Typography.Text>
-                        {notifications.next_page_url && (
-                            <Button size="small" onClick={() => router.visit(notifications.next_page_url!)}>
+                        {notifications.links.next && (
+                            <Button size="small" onClick={() => router.visit(notifications.links.next!)}>
                                 Siguiente
                             </Button>
                         )}
