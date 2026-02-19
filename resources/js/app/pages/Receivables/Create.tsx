@@ -3,13 +3,14 @@ import { Head, useForm } from '@inertiajs/react';
 import { Card } from 'antd';
 import { AppLayout } from '@/app/components/common/AppLayout';
 import { ReceivableForm } from '@/app/components/receivables';
-import { ReceivableTypeOption } from '@/app/types';
+import { ReceivableTypeOption, Account } from '@/app/types';
 
 interface Props {
     receivableTypes: ReceivableTypeOption[];
+    accounts: Account[];
 }
 
-export default function CreateReceivable({ receivableTypes }: Props) {
+export default function CreateReceivable({ receivableTypes, accounts }: Props) {
     const { data, setData, post, processing, errors } = useForm({
         type: 'receivable',
         person_name: '',
@@ -18,6 +19,9 @@ export default function CreateReceivable({ receivableTypes }: Props) {
         concept: '',
         due_date: '',
         notes: '',
+        create_transaction: false,
+        account_id: undefined as number | undefined,
+        transaction_date: '',
     });
 
     const handleSubmit = () => {
@@ -32,6 +36,7 @@ export default function CreateReceivable({ receivableTypes }: Props) {
                 <Card style={{ borderRadius: 12 }}>
                     <ReceivableForm
                         receivableTypes={receivableTypes}
+                        accounts={accounts}
                         data={data}
                         errors={errors}
                         processing={processing}

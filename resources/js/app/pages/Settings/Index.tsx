@@ -14,6 +14,7 @@ import {
     DownloadOutlined,
     AppstoreOutlined,
     MailOutlined,
+    DollarOutlined,
 } from '@ant-design/icons';
 import { AppLayout } from '@/app/components/common/AppLayout';
 import { useAuth } from '@/app/hooks/useAuth';
@@ -113,6 +114,15 @@ export default function SettingsIndex({ user }: Props) {
             color: colors.error.main,
             bg: colors.error.light,
             route: '/credits',
+        },
+        {
+            key: 'receivables',
+            label: 'Cuentas por Cobrar',
+            description: 'Deudas y préstamos',
+            icon: <DollarOutlined />,
+            color: '#13c2c2',
+            bg: '#e6fffb',
+            route: '/receivables',
         },
         {
             key: 'members',

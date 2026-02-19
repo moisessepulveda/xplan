@@ -24,6 +24,10 @@ class StoreReceivableRequest extends FormRequest
             'concept' => ['required', 'string', 'max:500'],
             'due_date' => ['nullable', 'date'],
             'notes' => ['nullable', 'string', 'max:1000'],
+            // Transaction creation fields
+            'create_transaction' => ['nullable', 'boolean'],
+            'account_id' => ['nullable', 'required_if:create_transaction,true', 'exists:accounts,id'],
+            'transaction_date' => ['nullable', 'date'],
         ];
     }
 
@@ -37,6 +41,8 @@ class StoreReceivableRequest extends FormRequest
             'amount.min' => 'El monto debe ser mayor a 0.',
             'concept.required' => 'El concepto es requerido.',
             'due_date.date' => 'La fecha de vencimiento no es válida.',
+            'account_id.required_if' => 'Debes seleccionar una cuenta para crear la transacción.',
+            'account_id.exists' => 'La cuenta seleccionada no existe.',
         ];
     }
 }

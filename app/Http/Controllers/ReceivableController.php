@@ -70,6 +70,7 @@ class ReceivableController extends Controller
     {
         return Inertia::render('Receivables/Create', [
             'receivableTypes' => ReceivableType::options(),
+            'accounts' => AccountResource::collection(Account::active()->ordered()->get()),
         ]);
     }
 

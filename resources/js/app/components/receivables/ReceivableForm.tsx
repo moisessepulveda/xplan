@@ -1,16 +1,18 @@
 import React from 'react';
-import { Form, Input, InputNumber, DatePicker, Button, Segmented } from 'antd';
+import { Form, Input, InputNumber, DatePicker, Button, Segmented, Switch, Select, Card, Typography } from 'antd';
 import {
     ArrowDownOutlined,
     ArrowUpOutlined,
+    BankOutlined,
 } from '@ant-design/icons';
-import { Receivable, ReceivableTypeOption } from '@/app/types';
+import { Receivable, ReceivableTypeOption, Account } from '@/app/types';
 import { colors } from '@/app/styles/theme';
 import dayjs from 'dayjs';
 
 interface Props {
     receivable?: Receivable;
     receivableTypes: ReceivableTypeOption[];
+    accounts?: Account[];
     data: {
         type: string;
         person_name: string;
@@ -19,6 +21,9 @@ interface Props {
         concept: string;
         due_date: string;
         notes: string;
+        create_transaction?: boolean;
+        account_id?: number;
+        transaction_date?: string;
     };
     errors: Partial<Record<string, string>>;
     processing: boolean;
@@ -29,6 +34,7 @@ interface Props {
 export function ReceivableForm({
     receivable,
     receivableTypes,
+    accounts = [],
     data,
     errors,
     processing,
@@ -168,6 +174,75 @@ export function ReceivableForm({
                 />
             </Form.Item>
 
+            {/* Create transaction option - only for new receivables */}
+            {!receivable && accounts.length > 0 && (
+                <Card
+                    size="small"
+                    style={{
+                        marginBottom: 16,
+                        backgroundColor: 'var(--ant-color-fill-tertiary)',
+                        borderColor: data.create_transaction ? (isReceivable ? colors.income.main : colors.expense.main) : undefined,
+                    }}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: data.create_transaction ? 12 : 0 }}>
+                        <div>
+                            <Typography.Text strong style={{ display: 'block' }}>
+                                <BankOutlined style={{ marginRight: 6 }} />
+                                {isReceivable ? 'Registrar egreso' : 'Registrar ingreso'}
+                            </Typography.Text>
+                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                {isReceivable
+                                    ? 'Descontar el préstamo de una cuenta'
+                                    : 'Registrar el dinero recibido en una cuenta'}
+                            </Typography.Text>
+                        </div>
+                        <Switch
+                            checked={data.create_transaction}
+                            onChange={(checked) => {
+                                setData('create_transaction', checked);
+                                if (!checked) {
+                                    setData('account_id', undefined);
+                                }
+                            }}
+                        />
+                    </div>
+
+                    {data.create_transaction && (
+                        <>
+                            <Form.Item
+                                label="Cuenta"
+                                style={{ marginBottom: 8 }}
+                                required
+                            >
+                                <Select
+                                    size="large"
+                                    placeholder="Seleccionar cuenta"
+                                    value={data.account_id}
+                                    onChange={(value) => setData('account_id', value)}
+                                    options={accounts.map((acc) => ({
+                                        value: acc.id,
+                                        label: acc.name,
+                                    }))}
+                                />
+                            </Form.Item>
+
+                            <Form.Item
+                                label="Fecha de la transacción"
+                                style={{ marginBottom: 0 }}
+                            >
+                                <DatePicker
+                                    size="large"
+                                    style={{ width: '100%' }}
+                                    value={data.transaction_date ? dayjs(data.transaction_date) : dayjs()}
+                                    onChange={(date) => setData('transaction_date', date?.format('YYYY-MM-DD') || '')}
+                                    placeholder="Hoy"
+                                />
+                            </Form.Item>
+                        </>
+                    )}
+                </Card>
+            )}
+
             {/* Notes */}
             <Form.Item label="Notas (opcional)">
                 <Input.TextArea
@@ -186,6 +261,7 @@ export function ReceivableForm({
                     size="large"
                     block
                     loading={processing}
+                    disabled={data.create_transaction && !data.account_id}
                     style={{
                         backgroundColor: isReceivable ? colors.income.main : colors.expense.main,
                         borderColor: isReceivable ? colors.income.main : colors.expense.main,
