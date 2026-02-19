@@ -213,21 +213,31 @@ export interface RecurringTransaction {
   id: number;
   planning_id?: number;
   type: TransactionType;
+  type_label: string;
+  type_color: string;
+  type_icon: string;
   amount: number;
   account_id: number;
   destination_account_id?: number;
   category_id?: number;
   description?: string;
   frequency: FrequencyType;
+  frequency_label: string;
   start_date: string;
   end_date?: string;
   next_run_date: string;
   last_run_date?: string;
   is_active: boolean;
   tags: string[];
+  applied_months?: string[];
+  skipped_months?: string[];
   account?: Account;
   destination_account?: Account;
   category?: Category;
+  created_by?: number;
+  creator?: User;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Receivable {

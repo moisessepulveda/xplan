@@ -26,6 +26,8 @@ class StoreTransactionRequest extends FormRequest
             'time' => ['nullable', 'date_format:H:i'],
             'tags' => ['nullable', 'array'],
             'tags.*' => ['string', 'max:50'],
+            'is_recurring' => ['nullable', 'boolean'],
+            'from_recurring_id' => ['nullable', 'integer', 'exists:recurring_transactions,id'],
         ];
     }
 

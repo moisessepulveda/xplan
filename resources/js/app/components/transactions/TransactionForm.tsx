@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Form, Input, InputNumber, Select, DatePicker, Button, Segmented } from 'antd';
+import { Form, Input, InputNumber, Select, DatePicker, Button, Segmented, Switch, Typography } from 'antd';
 import {
     ArrowUpOutlined,
     ArrowDownOutlined,
@@ -28,6 +28,8 @@ interface Props {
         date: string;
         time: string;
         tags: string[];
+        is_recurring?: boolean;
+        from_recurring_id?: number;
     };
     errors: Partial<Record<string, string>>;
     processing: boolean;
@@ -268,6 +270,26 @@ export function TransactionForm({
                     onChange={(e) => setData('description', e.target.value)}
                 />
             </Form.Item>
+
+            {/* Recurring switch - only for new transactions (not from recurring) */}
+            {!transaction && !data.from_recurring_id && (
+                <Form.Item>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div>
+                            <Typography.Text strong>Repetir mensualmente</Typography.Text>
+                            {data.is_recurring && (
+                                <Typography.Text type="secondary" style={{ display: 'block', fontSize: 12 }}>
+                                    Aparecerá cada mes para su aprobación
+                                </Typography.Text>
+                            )}
+                        </div>
+                        <Switch
+                            checked={data.is_recurring}
+                            onChange={(checked) => setData('is_recurring', checked)}
+                        />
+                    </div>
+                </Form.Item>
+            )}
 
             {/* Submit */}
             <Form.Item style={{ marginBottom: 0, marginTop: 24 }}>

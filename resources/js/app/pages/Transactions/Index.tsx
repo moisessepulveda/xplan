@@ -10,12 +10,16 @@ import {
     CheckOutlined,
     CloseOutlined,
     MailOutlined,
+    SyncOutlined,
+    LeftOutlined,
+    RightOutlined,
 } from '@ant-design/icons';
 import * as Icons from '@ant-design/icons';
 import { AppLayout } from '@/app/components/common/AppLayout';
-import { TransactionList, TransactionFilters } from '@/app/components/transactions';
+import { TransactionList, TransactionFilters, RecurringPendingItem } from '@/app/components/transactions';
 import {
     Transaction,
+    RecurringTransaction,
     TransactionTypeOption,
     TransactionSummary,
     Account,
@@ -28,17 +32,30 @@ import { colors } from '@/app/styles/theme';
 interface Props {
     transactions: PaginatedData<Transaction>;
     pendingTransactions: Transaction[];
+    pendingRecurring: RecurringTransaction[];
     filters: Record<string, string | number>;
+    period: string;
     summary: TransactionSummary;
     transactionTypes: TransactionTypeOption[];
     accounts: Account[];
     categories: Category[];
 }
 
+function formatPeriodLabel(period: string): string {
+    const [year, month] = period.split('-');
+    const months = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+    ];
+    return `${months[parseInt(month) - 1]} ${year}`;
+}
+
 export default function TransactionsIndex({
     transactions,
     pendingTransactions,
+    pendingRecurring,
     filters,
+    period,
     summary,
     transactionTypes,
     accounts,
@@ -48,6 +65,7 @@ export default function TransactionsIndex({
     const [showFilters, setShowFilters] = useState(false);
     const [searchValue, setSearchValue] = useState(filters.search as string || '');
     const [processingId, setProcessingId] = useState<number | null>(null);
+    const [processingRecurringId, setProcessingRecurringId] = useState<number | null>(null);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-CL', {
@@ -61,6 +79,26 @@ export default function TransactionsIndex({
         if (!iconName) return null;
         const IconComponent = (Icons as Record<string, React.ComponentType<{ style?: React.CSSProperties }>>)[iconName];
         return IconComponent ? <IconComponent style={{ color: '#fff', fontSize: 16 }} /> : null;
+    };
+
+    const navigatePeriod = (direction: 'prev' | 'next') => {
+        const [year, month] = period.split('-').map(Number);
+        let newYear = year;
+        let newMonth = month + (direction === 'next' ? 1 : -1);
+
+        if (newMonth > 12) {
+            newMonth = 1;
+            newYear++;
+        } else if (newMonth < 1) {
+            newMonth = 12;
+            newYear--;
+        }
+
+        const newPeriod = `${newYear}-${String(newMonth).padStart(2, '0')}`;
+        router.visit('/transactions', {
+            data: { period: newPeriod },
+            preserveState: true,
+        });
     };
 
     const handleSelectTransaction = (transaction: Transaction) => {
@@ -83,26 +121,49 @@ export default function TransactionsIndex({
         });
     };
 
+    const handleApplyRecurring = (recurring: RecurringTransaction) => {
+        setProcessingRecurringId(recurring.id);
+        router.post(`/recurring/${recurring.id}/apply`, { period }, {
+            preserveScroll: true,
+            onFinish: () => setProcessingRecurringId(null),
+        });
+    };
+
+    const handleSkipRecurring = (recurring: RecurringTransaction) => {
+        setProcessingRecurringId(recurring.id);
+        router.post(`/recurring/${recurring.id}/skip`, { period }, {
+            preserveScroll: true,
+            onFinish: () => setProcessingRecurringId(null),
+        });
+    };
+
+    const handleModifyRecurring = (recurring: RecurringTransaction) => {
+        // Navegar al formulario de creación pre-llenado con los datos de la recurrente
+        router.visit(`/transactions/create?from_recurring=${recurring.id}&period=${period}`);
+    };
+
     const handleSearch = () => {
         router.visit('/transactions', {
-            data: { ...filters, search: searchValue || undefined },
+            data: { ...filters, period, search: searchValue || undefined },
             preserveState: true,
         });
     };
 
     const handleApplyFilters = (newFilters: Record<string, unknown>) => {
         router.visit('/transactions', {
-            data: newFilters as Record<string, string>,
+            data: { ...newFilters, period } as Record<string, string>,
             preserveState: true,
         });
     };
 
     const handleClearFilters = () => {
-        router.visit('/transactions');
+        router.visit('/transactions', {
+            data: { period },
+        });
     };
 
     const hasActiveFilters = Object.keys(filters).some(
-        (key) => key !== 'page' && key !== 'per_page' && filters[key]
+        (key) => key !== 'page' && key !== 'per_page' && key !== 'period' && filters[key]
     );
 
     return (
@@ -110,6 +171,30 @@ export default function TransactionsIndex({
             <Head title="Transacciones" />
 
             <div style={{ padding: 16 }}>
+                {/* Period Navigator */}
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 16,
+                    }}
+                >
+                    <Button
+                        type="text"
+                        icon={<LeftOutlined />}
+                        onClick={() => navigatePeriod('prev')}
+                    />
+                    <Typography.Text strong style={{ fontSize: 16 }}>
+                        {formatPeriodLabel(period)}
+                    </Typography.Text>
+                    <Button
+                        type="text"
+                        icon={<RightOutlined />}
+                        onClick={() => navigatePeriod('next')}
+                    />
+                </div>
+
                 {/* Monthly Summary */}
                 <Card
                     style={{
@@ -194,6 +279,43 @@ export default function TransactionsIndex({
                     />
                 </div>
 
+                {/* Pending Recurring Transactions */}
+                {pendingRecurring && pendingRecurring.length > 0 && (
+                    <Card
+                        size="small"
+                        title={
+                            <Space>
+                                <SyncOutlined style={{ color: colors.primary[500] }} />
+                                <span>Transacciones recurrentes de este mes</span>
+                                <Tag color="blue">{pendingRecurring.length}</Tag>
+                            </Space>
+                        }
+                        extra={
+                            <Button
+                                type="link"
+                                size="small"
+                                onClick={() => router.visit('/transactions-recurring')}
+                            >
+                                Gestionar
+                            </Button>
+                        }
+                        style={{ marginBottom: 16 }}
+                    >
+                        <List
+                            dataSource={pendingRecurring}
+                            renderItem={(recurring) => (
+                                <RecurringPendingItem
+                                    recurring={recurring}
+                                    processing={processingRecurringId === recurring.id}
+                                    onApply={handleApplyRecurring}
+                                    onSkip={handleSkipRecurring}
+                                    onModify={handleModifyRecurring}
+                                />
+                            )}
+                        />
+                    </Card>
+                )}
+
                 {/* Pending Transactions */}
                 {pendingTransactions && pendingTransactions.length > 0 && (
                     <Card
@@ -205,8 +327,7 @@ export default function TransactionsIndex({
                                 <Tag color="warning">{pendingTransactions.length}</Tag>
                             </Space>
                         }
-                        style={{ marginBottom: 16, borderColor: colors.warning[300] }}
-                        styles={{ header: { backgroundColor: colors.warning[50] } }}
+                        style={{ marginBottom: 16 }}
                     >
                         <List
                             dataSource={pendingTransactions}
@@ -336,17 +457,25 @@ export default function TransactionsIndex({
                     </div>
                 )}
 
-                {/* Add Transaction Button */}
-                <Button
-                    type="dashed"
-                    icon={<PlusOutlined />}
-                    block
-                    size="large"
-                    onClick={() => router.visit('/transactions/create')}
-                    style={{ marginTop: 8 }}
-                >
-                    Nueva Transacción
-                </Button>
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                    <Button
+                        type="dashed"
+                        icon={<PlusOutlined />}
+                        size="large"
+                        onClick={() => router.visit('/transactions/create')}
+                        style={{ flex: 1 }}
+                    >
+                        Nueva Transacción
+                    </Button>
+                    <Button
+                        icon={<SyncOutlined />}
+                        size="large"
+                        onClick={() => router.visit('/transactions-recurring')}
+                    >
+                        Recurrentes
+                    </Button>
+                </div>
             </div>
 
             {/* Filters Drawer */}

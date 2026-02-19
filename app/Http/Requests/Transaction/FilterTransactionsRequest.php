@@ -16,6 +16,7 @@ class FilterTransactionsRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'period' => ['nullable', 'string', 'regex:/^\d{4}-\d{2}$/'],
             'type' => ['nullable', 'string', Rule::enum(TransactionType::class)],
             'account_id' => ['nullable', 'integer', 'exists:accounts,id'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],

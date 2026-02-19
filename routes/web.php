@@ -104,6 +104,10 @@ Route::middleware('auth')->group(function () {
         Route::post('transactions/{transaction}/approve', [TransactionController::class, 'approve'])->name('transactions.approve');
         Route::post('transactions/{transaction}/reject', [TransactionController::class, 'reject'])->name('transactions.reject');
         Route::get('transactions-recurring', [TransactionController::class, 'recurring'])->name('transactions.recurring');
+        Route::post('recurring/{recurring}/apply', [TransactionController::class, 'applyRecurring'])->name('recurring.apply');
+        Route::post('recurring/{recurring}/skip', [TransactionController::class, 'skipRecurring'])->name('recurring.skip');
+        Route::post('recurring/{recurring}/toggle', [TransactionController::class, 'toggleRecurring'])->name('recurring.toggle');
+        Route::delete('recurring/{recurring}', [TransactionController::class, 'destroyRecurring'])->name('recurring.destroy');
 
         // Budgets (Presupuestos)
         Route::get('budgets', [BudgetController::class, 'index'])->name('budgets.index');

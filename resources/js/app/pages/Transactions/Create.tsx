@@ -3,30 +3,40 @@ import { Head, useForm, usePage } from '@inertiajs/react';
 import { Card } from 'antd';
 import { AppLayout } from '@/app/components/common/AppLayout';
 import { TransactionForm } from '@/app/components/transactions';
-import { TransactionTypeOption, Account, Category } from '@/app/types';
+import { TransactionTypeOption, Account, Category, RecurringTransaction } from '@/app/types';
 
 interface Props {
     transactionTypes: TransactionTypeOption[];
     accounts: Account[];
     categories: Category[];
+    fromRecurring?: RecurringTransaction;
+    period?: string;
 }
 
-export default function CreateTransaction({ transactionTypes, accounts, categories }: Props) {
+export default function CreateTransaction({ transactionTypes, accounts, categories, fromRecurring, period }: Props) {
     // Read type from URL query params (from QuickActions)
     const { url } = usePage();
     const searchParams = new URLSearchParams(url.split('?')[1] || '');
-    const defaultType = searchParams.get('type') || 'expense';
+    const urlType = searchParams.get('type');
+
+    // Determine default values
+    const defaultType = fromRecurring?.type || urlType || 'expense';
+    const defaultDate = period
+        ? `${period}-01`
+        : new Date().toISOString().split('T')[0];
 
     const { data, setData, post, processing, errors } = useForm({
         type: defaultType,
-        amount: 0,
-        account_id: accounts.length === 1 ? accounts[0].id : undefined as number | undefined,
-        destination_account_id: undefined as number | undefined,
-        category_id: undefined as number | undefined,
-        description: '',
-        date: new Date().toISOString().split('T')[0],
+        amount: fromRecurring?.amount || 0,
+        account_id: fromRecurring?.account_id || (accounts.length === 1 ? accounts[0].id : undefined) as number | undefined,
+        destination_account_id: fromRecurring?.destination_account_id || undefined as number | undefined,
+        category_id: fromRecurring?.category_id || undefined as number | undefined,
+        description: fromRecurring?.description || '',
+        date: defaultDate,
         time: '',
-        tags: [] as string[],
+        tags: fromRecurring?.tags || [] as string[],
+        is_recurring: false,
+        from_recurring_id: fromRecurring?.id || undefined as number | undefined,
     });
 
     const handleSubmit = () => {

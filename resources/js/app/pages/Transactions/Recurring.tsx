@@ -1,12 +1,16 @@
 import React from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Card, Typography, Empty, Tag, Switch, Button } from 'antd';
+import { Card, Typography, Empty, Tag, Button, Popconfirm, Dropdown } from 'antd';
 import {
     SyncOutlined,
     ArrowUpOutlined,
     ArrowDownOutlined,
     SwapOutlined,
     CalendarOutlined,
+    MoreOutlined,
+    PauseCircleOutlined,
+    PlayCircleOutlined,
+    DeleteOutlined,
 } from '@ant-design/icons';
 import { AppLayout } from '@/app/components/common/AppLayout';
 import { RecurringTransaction, FrequencyOption, TransactionTypeOption, Account, Category } from '@/app/types';
@@ -62,6 +66,34 @@ export default function RecurringTransactionsPage({
             year: 'numeric',
         });
     };
+
+    const handleToggle = (recurring: RecurringTransaction) => {
+        router.post(`/recurring/${recurring.id}/toggle`, {}, {
+            preserveScroll: true,
+        });
+    };
+
+    const handleDelete = (recurring: RecurringTransaction) => {
+        router.delete(`/recurring/${recurring.id}`, {
+            preserveScroll: true,
+        });
+    };
+
+    const getMenuItems = (recurring: RecurringTransaction) => [
+        {
+            key: 'toggle',
+            label: recurring.is_active ? 'Desactivar' : 'Activar',
+            icon: recurring.is_active ? <PauseCircleOutlined /> : <PlayCircleOutlined />,
+            onClick: () => handleToggle(recurring),
+        },
+        {
+            key: 'delete',
+            label: 'Eliminar',
+            icon: <DeleteOutlined />,
+            danger: true,
+            onClick: () => handleDelete(recurring),
+        },
+    ];
 
     const active = recurringTransactions.filter((r) => r.is_active);
     const inactive = recurringTransactions.filter((r) => !r.is_active);
@@ -127,10 +159,21 @@ export default function RecurringTransactionsPage({
                                                     style={{
                                                         color: typeColorMap[recurring.type],
                                                         fontSize: 15,
+                                                        marginRight: 8,
                                                     }}
                                                 >
                                                     {formatCurrency(recurring.amount)}
                                                 </Typography.Text>
+                                                <Dropdown
+                                                    menu={{ items: getMenuItems(recurring) }}
+                                                    trigger={['click']}
+                                                >
+                                                    <Button
+                                                        type="text"
+                                                        size="small"
+                                                        icon={<MoreOutlined />}
+                                                    />
+                                                </Dropdown>
                                             </div>
                                         </Card>
                                     ))}
@@ -173,9 +216,19 @@ export default function RecurringTransactionsPage({
                                                         <Tag color="default" style={{ fontSize: 10 }}>Inactiva</Tag>
                                                     </div>
                                                 </div>
-                                                <Typography.Text type="secondary">
+                                                <Typography.Text type="secondary" style={{ marginRight: 8 }}>
                                                     {formatCurrency(recurring.amount)}
                                                 </Typography.Text>
+                                                <Dropdown
+                                                    menu={{ items: getMenuItems(recurring) }}
+                                                    trigger={['click']}
+                                                >
+                                                    <Button
+                                                        type="text"
+                                                        size="small"
+                                                        icon={<MoreOutlined />}
+                                                    />
+                                                </Dropdown>
                                             </div>
                                         </Card>
                                     ))}
