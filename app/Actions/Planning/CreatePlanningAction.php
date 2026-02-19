@@ -6,7 +6,7 @@ use App\Enums\MemberRole;
 use App\Models\Planning;
 use App\Models\PlanningMember;
 use App\Models\User;
-use Database\Seeders\DefaultCategoriesSeeder;
+use App\Services\DefaultCategoriesService;
 use Illuminate\Support\Facades\DB;
 
 class CreatePlanningAction
@@ -78,6 +78,6 @@ class CreatePlanningAction
      */
     public function createDefaultCategories(Planning $planning, User $user): void
     {
-        DefaultCategoriesSeeder::createForPlanning($planning, $user->id);
+        app(DefaultCategoriesService::class)->createForPlanning($planning, $user->id);
     }
 }
