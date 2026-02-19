@@ -272,7 +272,11 @@ export interface Budget {
   start_date?: string;
   end_date?: string;
   active: boolean;
+  total_budgeted: number;
+  created_by: number;
   lines?: BudgetLine[];
+  created_at: string;
+  updated_at: string;
 }
 
 export interface BudgetLine {
@@ -280,9 +284,62 @@ export interface BudgetLine {
   budget_id: number;
   category_id: number;
   amount: number;
+  alert_at_50: boolean;
+  alert_at_80: boolean;
+  alert_at_100: boolean;
+  notes?: string;
   spent?: number;
+  remaining?: number;
   percentage?: number;
+  status?: BudgetLineStatus;
   category?: Category;
+}
+
+export type BudgetLineStatus = 'normal' | 'caution' | 'warning' | 'exceeded';
+
+export interface BudgetProgress {
+  budget: Budget;
+  period: string;
+  lines: BudgetProgressLine[];
+  total_budgeted: number;
+  total_spent: number;
+  total_remaining: number;
+  total_percentage: number;
+}
+
+export interface BudgetProgressLine {
+  id: number;
+  category_id: number;
+  category?: Category;
+  amount: number;
+  spent: number;
+  remaining: number;
+  percentage: number;
+  alert_at_50: boolean;
+  alert_at_80: boolean;
+  alert_at_100: boolean;
+  status: BudgetLineStatus;
+  notes?: string;
+}
+
+export interface BudgetHistoryItem {
+  id: number;
+  budget_id: number;
+  budget_name?: string;
+  period: string;
+  total_budgeted: number;
+  total_spent: number;
+  usage_percentage: number;
+  lines_snapshot: BudgetSnapshotLine[];
+  closed_at: string;
+}
+
+export interface BudgetSnapshotLine {
+  category_id: number;
+  category_name?: string;
+  amount: number;
+  spent: number;
+  percentage: number;
 }
 
 export interface Credit {

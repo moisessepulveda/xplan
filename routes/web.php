@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\ReceivableController;
 use App\Http\Middleware\EnsureActivePlanning;
 use Illuminate\Support\Facades\Route;
@@ -85,6 +86,17 @@ Route::middleware('auth')->group(function () {
         Route::resource('transactions', TransactionController::class);
         Route::post('transactions/{transaction}/duplicate', [TransactionController::class, 'duplicate'])->name('transactions.duplicate');
         Route::get('transactions-recurring', [TransactionController::class, 'recurring'])->name('transactions.recurring');
+
+        // Budgets (Presupuestos)
+        Route::get('budgets', [BudgetController::class, 'index'])->name('budgets.index');
+        Route::get('budgets/configure', [BudgetController::class, 'configure'])->name('budgets.configure');
+        Route::post('budgets', [BudgetController::class, 'store'])->name('budgets.store');
+        Route::put('budgets/{budget}', [BudgetController::class, 'update'])->name('budgets.update');
+        Route::delete('budgets/{budget}', [BudgetController::class, 'destroy'])->name('budgets.destroy');
+        Route::get('budgets/{budget}/category/{categoryId}', [BudgetController::class, 'category'])->name('budgets.category');
+        Route::get('budgets/history', [BudgetController::class, 'history'])->name('budgets.history');
+        Route::post('budgets/{budget}/copy', [BudgetController::class, 'copy'])->name('budgets.copy');
+        Route::post('budgets/{budget}/close-period', [BudgetController::class, 'closePeriod'])->name('budgets.close-period');
 
         // Receivables (Cuentas Pendientes)
         Route::resource('receivables', ReceivableController::class);
