@@ -12,8 +12,12 @@ class UpdateTransactionAction
     public function execute(Transaction $transaction, array $data): Transaction
     {
         return DB::transaction(function () use ($transaction, $data) {
-            // Reverse the old balance impact
-            $this->reverseBalanceImpact($transaction);
+            $isPending = $transaction->pending_approval;
+
+            // Solo revertir saldos si la transacción NO está pendiente de aprobación
+            if (!$isPending) {
+                $this->reverseBalanceImpact($transaction);
+            }
 
             $transaction->update([
                 'account_id' => $data['account_id'] ?? $transaction->account_id,
@@ -30,8 +34,10 @@ class UpdateTransactionAction
 
             $transaction->refresh();
 
-            // Apply the new balance impact
-            $this->applyBalanceImpact($transaction);
+            // Solo aplicar saldos si la transacción NO está pendiente de aprobación
+            if (!$isPending) {
+                $this->applyBalanceImpact($transaction);
+            }
 
             return $transaction->fresh();
         });

@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Button, Card, Typography, Input, Row, Col } from 'antd';
+import { Button, Card, Typography, Input, Row, Col, List, Tag, Space, Popconfirm } from 'antd';
 import {
     PlusOutlined,
     FilterOutlined,
     SearchOutlined,
     ArrowUpOutlined,
     ArrowDownOutlined,
+    CheckOutlined,
+    CloseOutlined,
+    MailOutlined,
 } from '@ant-design/icons';
 import { AppLayout } from '@/app/components/common/AppLayout';
 import { TransactionList, TransactionFilters } from '@/app/components/transactions';
@@ -23,6 +26,7 @@ import { colors } from '@/app/styles/theme';
 
 interface Props {
     transactions: PaginatedData<Transaction>;
+    pendingTransactions: Transaction[];
     filters: Record<string, string | number>;
     summary: TransactionSummary;
     transactionTypes: TransactionTypeOption[];
@@ -32,6 +36,7 @@ interface Props {
 
 export default function TransactionsIndex({
     transactions,
+    pendingTransactions,
     filters,
     summary,
     transactionTypes,
@@ -41,6 +46,7 @@ export default function TransactionsIndex({
     const { planning } = usePlanning();
     const [showFilters, setShowFilters] = useState(false);
     const [searchValue, setSearchValue] = useState(filters.search as string || '');
+    const [processingId, setProcessingId] = useState<number | null>(null);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-CL', {
@@ -52,6 +58,22 @@ export default function TransactionsIndex({
 
     const handleSelectTransaction = (transaction: Transaction) => {
         router.visit(`/transactions/${transaction.id}`);
+    };
+
+    const handleApprove = (transaction: Transaction) => {
+        setProcessingId(transaction.id);
+        router.post(`/transactions/${transaction.id}/approve`, {}, {
+            preserveScroll: true,
+            onFinish: () => setProcessingId(null),
+        });
+    };
+
+    const handleReject = (transaction: Transaction) => {
+        setProcessingId(transaction.id);
+        router.post(`/transactions/${transaction.id}/reject`, {}, {
+            preserveScroll: true,
+            onFinish: () => setProcessingId(null),
+        });
     };
 
     const handleSearch = () => {
@@ -164,6 +186,106 @@ export default function TransactionsIndex({
                         type={hasActiveFilters ? 'primary' : 'default'}
                     />
                 </div>
+
+                {/* Pending Transactions */}
+                {pendingTransactions && pendingTransactions.length > 0 && (
+                    <Card
+                        size="small"
+                        title={
+                            <Space>
+                                <MailOutlined style={{ color: colors.warning[500] }} />
+                                <span>Transacciones pendientes de aprobación</span>
+                                <Tag color="warning">{pendingTransactions.length}</Tag>
+                            </Space>
+                        }
+                        style={{ marginBottom: 16, borderColor: colors.warning[300] }}
+                        styles={{ header: { backgroundColor: colors.warning[50] } }}
+                    >
+                        <List
+                            dataSource={pendingTransactions}
+                            renderItem={(tx) => (
+                                <List.Item
+                                    style={{ padding: '8px 0' }}
+                                    actions={[
+                                        <Button
+                                            key="approve"
+                                            type="primary"
+                                            size="small"
+                                            icon={<CheckOutlined />}
+                                            loading={processingId === tx.id}
+                                            onClick={() => handleApprove(tx)}
+                                            style={{ backgroundColor: colors.success[500] }}
+                                        />,
+                                        <Popconfirm
+                                            key="reject"
+                                            title="¿Rechazar transacción?"
+                                            description="Esta transacción será eliminada"
+                                            onConfirm={() => handleReject(tx)}
+                                            okText="Sí, rechazar"
+                                            cancelText="Cancelar"
+                                            okButtonProps={{ danger: true }}
+                                        >
+                                            <Button
+                                                danger
+                                                size="small"
+                                                icon={<CloseOutlined />}
+                                                loading={processingId === tx.id}
+                                            />
+                                        </Popconfirm>,
+                                    ]}
+                                >
+                                    <List.Item.Meta
+                                        title={
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                <Typography.Text
+                                                    style={{ cursor: 'pointer' }}
+                                                    onClick={() => handleSelectTransaction(tx)}
+                                                >
+                                                    {tx.description || 'Sin descripción'}
+                                                </Typography.Text>
+                                                <Tag color={tx.type === 'expense' ? 'red' : 'green'} style={{ fontSize: 11 }}>
+                                                    {tx.type_label}
+                                                </Tag>
+                                            </div>
+                                        }
+                                        description={
+                                            <Space size={4} wrap>
+                                                <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                    {tx.date}
+                                                </Typography.Text>
+                                                {tx.account && (
+                                                    <>
+                                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>•</Typography.Text>
+                                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                            {tx.account.name}
+                                                        </Typography.Text>
+                                                    </>
+                                                )}
+                                                {tx.category && (
+                                                    <>
+                                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>•</Typography.Text>
+                                                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                                            {tx.category.name}
+                                                        </Typography.Text>
+                                                    </>
+                                                )}
+                                            </Space>
+                                        }
+                                    />
+                                    <Typography.Text
+                                        strong
+                                        style={{
+                                            color: tx.type === 'expense' ? colors.error[500] : colors.success[500],
+                                            marginRight: 8,
+                                        }}
+                                    >
+                                        {tx.type === 'expense' ? '-' : '+'}{formatCurrency(tx.amount)}
+                                    </Typography.Text>
+                                </List.Item>
+                            )}
+                        />
+                    </Card>
+                )}
 
                 {/* Transactions List */}
                 <div style={{ marginBottom: 16 }}>

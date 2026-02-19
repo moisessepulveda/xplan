@@ -12,6 +12,8 @@ class CreateTransactionAction
     public function execute(array $data): Transaction
     {
         return DB::transaction(function () use ($data) {
+            $pendingApproval = $data['pending_approval'] ?? false;
+
             $transaction = Transaction::create([
                 'planning_id' => $data['planning_id'] ?? auth()->user()->active_planning_id,
                 'account_id' => $data['account_id'],
@@ -25,11 +27,16 @@ class CreateTransactionAction
                 'time' => $data['time'] ?? null,
                 'is_recurring' => $data['is_recurring'] ?? false,
                 'recurring_transaction_id' => $data['recurring_transaction_id'] ?? null,
+                'pending_approval' => $pendingApproval,
+                'source' => $data['source'] ?? 'manual',
                 'tags' => $data['tags'] ?? [],
                 'attachments' => $data['attachments'] ?? [],
             ]);
 
-            $this->updateAccountBalances($transaction);
+            // Solo actualizar saldos si la transacción NO está pendiente de aprobación
+            if (!$pendingApproval) {
+                $this->updateAccountBalances($transaction);
+            }
 
             return $transaction;
         });

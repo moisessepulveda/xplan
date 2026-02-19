@@ -20,6 +20,8 @@ class TransactionResource extends JsonResource
             'date' => $this->date->format('Y-m-d'),
             'time' => $this->time,
             'is_recurring' => $this->is_recurring,
+            'pending_approval' => $this->pending_approval,
+            'source' => $this->source,
             'tags' => $this->tags ?? [],
             'attachments' => $this->attachments ?? [],
 

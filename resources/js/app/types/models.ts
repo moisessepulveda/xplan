@@ -174,6 +174,8 @@ export interface Transaction {
   date: string;
   time?: string;
   is_recurring: boolean;
+  pending_approval: boolean;
+  source?: string;
   tags: string[];
   attachments: string[];
   created_by: number;

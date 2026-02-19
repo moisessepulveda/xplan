@@ -27,6 +27,8 @@ class Transaction extends Model
         'time',
         'is_recurring',
         'recurring_transaction_id',
+        'pending_approval',
+        'source',
         'tags',
         'attachments',
     ];
@@ -36,6 +38,7 @@ class Transaction extends Model
         'amount' => 'decimal:2',
         'date' => 'date',
         'is_recurring' => 'boolean',
+        'pending_approval' => 'boolean',
         'tags' => 'array',
         'attachments' => 'array',
     ];
@@ -111,5 +114,54 @@ class Transaction extends Model
     public function getBalanceImpact(): float
     {
         return (float) $this->amount * $this->type->balanceMultiplier();
+    }
+
+    public function scopePendingApproval($query)
+    {
+        return $query->where('pending_approval', true);
+    }
+
+    public function scopeApproved($query)
+    {
+        return $query->where('pending_approval', false);
+    }
+
+    public function scopeFromEmail($query)
+    {
+        return $query->where('source', 'email');
+    }
+
+    public function approve(): void
+    {
+        $this->update(['pending_approval' => false]);
+
+        // Actualizar saldos de cuentas al aprobar
+        $this->updateAccountBalances();
+    }
+
+    protected function updateAccountBalances(): void
+    {
+        $account = $this->account;
+
+        match ($this->type) {
+            TransactionType::INCOME => $account->updateBalance($this->amount),
+            TransactionType::EXPENSE => $account->updateBalance(-$this->amount),
+            TransactionType::TRANSFER => $this->processTransferBalances($account),
+        };
+    }
+
+    protected function processTransferBalances(Account $sourceAccount): void
+    {
+        $sourceAccount->updateBalance(-$this->amount);
+
+        if ($this->destination_account_id) {
+            $destinationAccount = Account::findOrFail($this->destination_account_id);
+            $destinationAccount->updateBalance($this->amount);
+        }
+    }
+
+    public function isPending(): bool
+    {
+        return $this->pending_approval === true;
     }
 }

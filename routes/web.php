@@ -101,6 +101,8 @@ Route::middleware('auth')->group(function () {
         // Transactions
         Route::resource('transactions', TransactionController::class);
         Route::post('transactions/{transaction}/duplicate', [TransactionController::class, 'duplicate'])->name('transactions.duplicate');
+        Route::post('transactions/{transaction}/approve', [TransactionController::class, 'approve'])->name('transactions.approve');
+        Route::post('transactions/{transaction}/reject', [TransactionController::class, 'reject'])->name('transactions.reject');
         Route::get('transactions-recurring', [TransactionController::class, 'recurring'])->name('transactions.recurring');
 
         // Budgets (Presupuestos)

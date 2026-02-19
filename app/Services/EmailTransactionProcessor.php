@@ -319,6 +319,8 @@ class EmailTransactionProcessor
             'amount' => abs((float) $amount),
             'description' => $description,
             'date' => $date,
+            'pending_approval' => true,
+            'source' => 'email',
             'tags' => ['email-sync'],
         ];
 

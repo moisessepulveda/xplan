@@ -12,7 +12,10 @@ class DeleteTransactionAction
     public function execute(Transaction $transaction): void
     {
         DB::transaction(function () use ($transaction) {
-            $this->reverseBalanceImpact($transaction);
+            // Solo revertir saldos si la transacción NO estaba pendiente de aprobación
+            if (!$transaction->pending_approval) {
+                $this->reverseBalanceImpact($transaction);
+            }
             $transaction->delete();
         });
     }

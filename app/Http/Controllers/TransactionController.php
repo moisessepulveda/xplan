@@ -28,7 +28,16 @@ class TransactionController extends Controller
     {
         $filters = $request->validated();
 
+        // Transacciones pendientes de aprobación (de emails)
+        $pendingTransactions = Transaction::with(['account', 'destinationAccount', 'category', 'creator'])
+            ->pendingApproval()
+            ->orderBy('date', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        // Transacciones aprobadas (normales)
         $query = Transaction::with(['account', 'destinationAccount', 'category', 'creator'])
+            ->approved()
             ->when($filters['type'] ?? null, fn($q, $type) => $q->where('type', $type))
             ->when($filters['account_id'] ?? null, fn($q, $id) => $q->forAccount($id))
             ->when($filters['category_id'] ?? null, fn($q, $id) => $q->forCategory($id))
@@ -41,21 +50,24 @@ class TransactionController extends Controller
         $perPage = $filters['per_page'] ?? 20;
         $transactions = $query->paginate($perPage)->withQueryString();
 
-        // Monthly summary
+        // Monthly summary (solo transacciones aprobadas)
         $now = now();
         $monthStart = $now->copy()->startOfMonth();
         $monthEnd = $now->copy()->endOfMonth();
 
         $monthlyIncome = Transaction::income()
+            ->approved()
             ->betweenDates($monthStart->toDateString(), $monthEnd->toDateString())
             ->sum('amount');
 
         $monthlyExpense = Transaction::expense()
+            ->approved()
             ->betweenDates($monthStart->toDateString(), $monthEnd->toDateString())
             ->sum('amount');
 
         return Inertia::render('Transactions/Index', [
             'transactions' => TransactionResource::collection($transactions),
+            'pendingTransactions' => TransactionResource::collection($pendingTransactions),
             'filters' => $filters,
             'summary' => [
                 'monthly_income' => (float) $monthlyIncome,
@@ -151,5 +163,21 @@ class TransactionController extends Controller
                 Category::active()->roots()->with('children')->ordered()->get()
             ),
         ]);
+    }
+
+    public function approve(Transaction $transaction): RedirectResponse
+    {
+        $transaction->approve();
+
+        return redirect()->back()
+            ->with('success', 'Transacción aprobada.');
+    }
+
+    public function reject(Transaction $transaction, DeleteTransactionAction $action): RedirectResponse
+    {
+        $action->execute($transaction);
+
+        return redirect()->back()
+            ->with('success', 'Transacción rechazada y eliminada.');
     }
 }
