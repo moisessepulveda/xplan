@@ -14,7 +14,6 @@ import {
 } from '@ant-design/icons';
 import { AppLayout } from '@/app/components/common/AppLayout';
 import { colors } from '@/app/styles/theme';
-import type { PaginatedData } from '@/app/types';
 
 interface NotificationItem {
     id: string;
@@ -28,8 +27,18 @@ interface NotificationItem {
     time_ago: string;
 }
 
+interface LaravelPagination<T> {
+    data: T[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    next_page_url: string | null;
+    prev_page_url: string | null;
+}
+
 interface Props {
-    notifications: PaginatedData<NotificationItem>;
+    notifications: LaravelPagination<NotificationItem>;
     unreadCount: number;
 }
 
@@ -225,18 +234,18 @@ export default function NotificationsIndex({ notifications, unreadCount }: Props
                 )}
 
                 {/* Pagination */}
-                {notifications.meta.last_page > 1 && (
+                {notifications.last_page > 1 && (
                     <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16, gap: 8 }}>
-                        {notifications.links.prev && (
-                            <Button size="small" onClick={() => router.visit(notifications.links.prev!)}>
+                        {notifications.prev_page_url && (
+                            <Button size="small" onClick={() => router.visit(notifications.prev_page_url!)}>
                                 Anterior
                             </Button>
                         )}
                         <Typography.Text type="secondary" style={{ lineHeight: '32px', fontSize: 12 }}>
-                            {notifications.meta.current_page} de {notifications.meta.last_page}
+                            {notifications.current_page} de {notifications.last_page}
                         </Typography.Text>
-                        {notifications.links.next && (
-                            <Button size="small" onClick={() => router.visit(notifications.links.next!)}>
+                        {notifications.next_page_url && (
+                            <Button size="small" onClick={() => router.visit(notifications.next_page_url!)}>
                                 Siguiente
                             </Button>
                         )}

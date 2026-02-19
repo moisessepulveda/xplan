@@ -151,7 +151,7 @@ class ReportGenerator
         $endDate = $endDate ?? now()->endOfMonth()->toDateString();
 
         $expenses = Transaction::query()
-            ->when($planningId, fn($q) => $q->where('planning_id', $planningId))
+            ->when($planningId, fn($q) => $q->where('transactions.planning_id', $planningId))
             ->expense()
             ->betweenDates($startDate, $endDate)
             ->join('categories', 'transactions.category_id', '=', 'categories.id')

@@ -258,11 +258,23 @@ class DefaultCategoriesService
                 'children' => [
                     ['name' => 'Cine/Teatro', 'icon' => 'play-circle', 'color' => '#ff4d4f'],
                     ['name' => 'Conciertos/Eventos', 'icon' => 'sound', 'color' => '#722ed1'],
-                    ['name' => 'Suscripciones Digitales', 'icon' => 'cloud', 'color' => '#1677ff'],
                     ['name' => 'Videojuegos', 'icon' => 'rocket', 'color' => '#52c41a'],
                     ['name' => 'Salidas/Fiestas', 'icon' => 'team', 'color' => '#fa8c16'],
                     ['name' => 'Viajes/Vacaciones', 'icon' => 'global', 'color' => '#13c2c2'],
                     ['name' => 'Hobbies', 'icon' => 'star', 'color' => '#eb2f96'],
+                ],
+            ],
+            [
+                'name' => 'Suscripciones Digitales',
+                'icon' => 'cloud',
+                'color' => '#722ed1',
+                'children' => [
+                    ['name' => 'Streaming Video', 'icon' => 'play-circle', 'color' => '#ff4d4f'],
+                    ['name' => 'Streaming Música', 'icon' => 'customer-service', 'color' => '#52c41a'],
+                    ['name' => 'Gaming', 'icon' => 'rocket', 'color' => '#1677ff'],
+                    ['name' => 'Cloud/Almacenamiento', 'icon' => 'cloud', 'color' => '#13c2c2'],
+                    ['name' => 'Software/Apps', 'icon' => 'appstore', 'color' => '#fa8c16'],
+                    ['name' => 'Noticias/Revistas', 'icon' => 'read', 'color' => '#8c8c8c'],
                 ],
             ],
             [

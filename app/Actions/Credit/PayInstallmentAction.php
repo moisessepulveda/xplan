@@ -5,6 +5,7 @@ namespace App\Actions\Credit;
 use App\Actions\Transaction\CreateTransactionAction;
 use App\Enums\CreditStatus;
 use App\Enums\InstallmentStatus;
+use App\Models\Category;
 use App\Models\Credit;
 use App\Models\CreditInstallment;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,11 @@ class PayInstallmentAction
             $credit = $installment->credit;
             $amount = $data['amount'] ?? (float) $installment->amount;
 
+            // Get the credits system category
+            $creditsCategory = Category::where('planning_id', $credit->planning_id)
+                ->credits()
+                ->first();
+
             // Create the expense transaction
             $transaction = $this->createTransactionAction->execute([
                 'planning_id' => $credit->planning_id,
@@ -29,7 +35,7 @@ class PayInstallmentAction
                 'amount' => $amount,
                 'description' => "Cuota #{$installment->number} - {$credit->name}",
                 'date' => $data['date'] ?? now()->format('Y-m-d'),
-                'category_id' => $data['category_id'] ?? null,
+                'category_id' => $creditsCategory?->id,
             ]);
 
             // Determine status

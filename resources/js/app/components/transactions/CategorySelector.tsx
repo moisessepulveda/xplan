@@ -1,5 +1,6 @@
-import React from 'react';
-import { Modal, List, Typography, Empty } from 'antd';
+import React, { useState, useMemo } from 'react';
+import { Modal, List, Typography, Empty, Input } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
 import { Category } from '@/app/types';
 import { getIcon } from '@/app/utils/icons';
 
@@ -20,32 +21,80 @@ export function CategorySelector({
     selectedId,
     type,
 }: Props) {
-    const filtered = type
-        ? categories.filter((c) => c.type === type)
-        : categories;
+    const [search, setSearch] = useState('');
+
+    const filtered = useMemo(() => {
+        let result = type
+            ? categories.filter((c) => c.type === type)
+            : categories;
+
+        if (search.trim()) {
+            const searchLower = search.toLowerCase().trim();
+            result = result
+                .map((category) => {
+                    // Check if parent matches
+                    const parentMatches = category.name.toLowerCase().includes(searchLower);
+                    // Filter children that match
+                    const matchingChildren = category.children?.filter((child) =>
+                        child.name.toLowerCase().includes(searchLower)
+                    );
+
+                    // Include category if parent matches or has matching children
+                    if (parentMatches || (matchingChildren && matchingChildren.length > 0)) {
+                        return {
+                            ...category,
+                            // If parent matches, show all children; otherwise show only matching children
+                            children: parentMatches ? category.children : matchingChildren,
+                        };
+                    }
+                    return null;
+                })
+                .filter(Boolean) as Category[];
+        }
+
+        return result;
+    }, [categories, type, search]);
 
     const handleSelect = (category: Category) => {
         onSelect(category.id);
+        setSearch('');
+        onClose();
+    };
+
+    const handleClose = () => {
+        setSearch('');
         onClose();
     };
 
     return (
         <Modal
             open={open}
-            onCancel={onClose}
+            onCancel={handleClose}
             footer={null}
             title="Seleccionar Categoría"
             centered
             styles={{
-                body: { padding: 0, maxHeight: 400, overflowY: 'auto' },
+                body: { padding: 0, maxHeight: 450, overflowY: 'auto' },
                 content: { borderRadius: 16 },
             }}
         >
+            {/* Search input */}
+            <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ant-color-border)' }}>
+                <Input
+                    placeholder="Buscar categoría..."
+                    prefix={<SearchOutlined style={{ color: 'var(--ant-color-text-quaternary)' }} />}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    allowClear
+                    autoFocus
+                />
+            </div>
+
             {filtered.length === 0 ? (
                 <div style={{ padding: 24 }}>
                     <Empty
                         image={Empty.PRESENTED_IMAGE_SIMPLE}
-                        description="Sin categorías disponibles"
+                        description={search ? `No se encontró "${search}"` : 'Sin categorías disponibles'}
                     />
                 </div>
             ) : (

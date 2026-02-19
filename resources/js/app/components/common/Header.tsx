@@ -55,9 +55,12 @@ export function Header({ title, showBack, onBack, rightContent }: HeaderProps) {
                 )}
 
                 {title ? (
-                    <Typography.Text strong style={{ fontSize: 18 }}>
-                        {title}
-                    </Typography.Text>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <Typography.Text strong style={{ fontSize: 18 }}>
+                            {title}
+                        </Typography.Text>
+                        <PlanningSelector compact />
+                    </div>
                 ) : (
                     <PlanningSelector />
                 )}

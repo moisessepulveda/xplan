@@ -65,22 +65,22 @@ class Transaction extends Model
 
     public function scopeOfType($query, TransactionType $type)
     {
-        return $query->where('type', $type);
+        return $query->where('transactions.type', $type);
     }
 
     public function scopeIncome($query)
     {
-        return $query->where('type', TransactionType::INCOME);
+        return $query->where('transactions.type', TransactionType::INCOME);
     }
 
     public function scopeExpense($query)
     {
-        return $query->where('type', TransactionType::EXPENSE);
+        return $query->where('transactions.type', TransactionType::EXPENSE);
     }
 
     public function scopeTransfer($query)
     {
-        return $query->where('type', TransactionType::TRANSFER);
+        return $query->where('transactions.type', TransactionType::TRANSFER);
     }
 
     public function scopeForAccount($query, int $accountId)
@@ -98,12 +98,12 @@ class Transaction extends Model
 
     public function scopeBetweenDates($query, string $startDate, string $endDate)
     {
-        return $query->whereBetween('date', [$startDate, $endDate]);
+        return $query->whereBetween('transactions.date', [$startDate, $endDate]);
     }
 
     public function scopeForMonth($query, int $year, int $month)
     {
-        return $query->whereYear('date', $year)->whereMonth('date', $month);
+        return $query->whereYear('transactions.date', $year)->whereMonth('transactions.date', $month);
     }
 
     public function isTransfer(): bool

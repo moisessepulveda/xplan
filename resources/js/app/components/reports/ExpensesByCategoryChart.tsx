@@ -2,6 +2,7 @@ import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { Typography, Empty } from 'antd';
 import { colors } from '@/app/styles/theme';
+import { getIcon } from '@/app/utils/icons';
 
 interface CategoryData {
     category_id: number;
@@ -89,8 +90,9 @@ export function ExpensesByCategoryChart({ data, total, formatCurrency }: Props) 
                                     backgroundColor: item.fill,
                                 }}
                             />
-                            <Typography.Text style={{ fontSize: 13 }}>
-                                {item.category_icon} {item.category_name}
+                            <Typography.Text style={{ fontSize: 13, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                <span style={{ color: item.fill }}>{getIcon(item.category_icon)}</span>
+                                {item.category_name}
                             </Typography.Text>
                         </div>
                         <div style={{ textAlign: 'right' }}>

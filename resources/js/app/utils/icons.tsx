@@ -81,6 +81,7 @@ const iconMap: Record<string, React.ReactNode> = {
     'medicine-box': <Icons.MedicineBoxOutlined />,
     'safety': <Icons.SafetyOutlined />,
     'safety-certificate': <Icons.SafetyCertificateOutlined />,
+    'user-switch': <Icons.UserSwitchOutlined />,
 
     // Entertainment & Leisure
     'smile': <Icons.SmileOutlined />,
@@ -110,6 +111,9 @@ const iconMap: Record<string, React.ReactNode> = {
     'file-ppt': <Icons.FilePptOutlined />,
     'file-image': <Icons.FileImageOutlined />,
     'file-zip': <Icons.FileZipOutlined />,
+    'file-search': <Icons.FileSearchOutlined />,
+    'file-done': <Icons.FileDoneOutlined />,
+    'file-protect': <Icons.FileProtectOutlined />,
     'folder': <Icons.FolderOutlined />,
     'folder-open': <Icons.FolderOpenOutlined />,
     'solution': <Icons.SolutionOutlined />,
@@ -158,6 +162,7 @@ const iconMap: Record<string, React.ReactNode> = {
     // Sports & Activities
     'dribbble': <Icons.DribbbleOutlined />,
     'slack': <Icons.SlackOutlined />,
+    'github': <Icons.GithubOutlined />,
 
     // Shapes & Symbols
     'star': <Icons.StarOutlined />,
@@ -187,6 +192,7 @@ const iconMap: Record<string, React.ReactNode> = {
     'sync': <Icons.SyncOutlined />,
     'redo': <Icons.RedoOutlined />,
     'reload': <Icons.ReloadOutlined />,
+    'rollback': <Icons.RollbackOutlined />,
     'filter': <Icons.FilterOutlined />,
     'search': <Icons.SearchOutlined />,
     'zoom-in': <Icons.ZoomInOutlined />,

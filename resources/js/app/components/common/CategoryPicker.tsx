@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
-import { Typography, Empty } from 'antd';
-import { CheckOutlined } from '@ant-design/icons';
+import React, { useMemo, useState } from 'react';
+import { Typography, Empty, Input } from 'antd';
+import { CheckOutlined, SearchOutlined } from '@ant-design/icons';
 import { BottomSheet } from './BottomSheet';
 import { Category } from '@/app/types';
 import { getIcon } from '@/app/utils/icons';
@@ -100,7 +100,9 @@ export function CategoryPicker({
     type,
     title = 'Seleccionar Categoría',
 }: CategoryPickerProps) {
-    // Filter by type if specified and group categories
+    const [search, setSearch] = useState('');
+
+    // Filter by type and search, then group categories
     const groupedCategories = useMemo(() => {
         let filtered = type
             ? categories.filter((c) => c.type === type)
@@ -108,7 +110,7 @@ export function CategoryPicker({
 
         // Separate parent categories (no parent_id) and child categories
         const parents = filtered.filter((c) => !c.parent_id);
-        const groups: { parent: Category; children: Category[] }[] = [];
+        let groups: { parent: Category; children: Category[] }[] = [];
 
         parents.forEach((parent) => {
             const children = parent.children || [];
@@ -118,11 +120,38 @@ export function CategoryPicker({
             });
         });
 
+        // Apply search filter
+        if (search.trim()) {
+            const searchLower = search.toLowerCase().trim();
+            groups = groups
+                .map(({ parent, children }) => {
+                    const parentMatches = parent.name.toLowerCase().includes(searchLower);
+                    const matchingChildren = children.filter((child) =>
+                        child.name.toLowerCase().includes(searchLower)
+                    );
+
+                    if (parentMatches || matchingChildren.length > 0) {
+                        return {
+                            parent,
+                            children: parentMatches ? children : matchingChildren,
+                        };
+                    }
+                    return null;
+                })
+                .filter(Boolean) as { parent: Category; children: Category[] }[];
+        }
+
         return groups;
-    }, [categories, type]);
+    }, [categories, type, search]);
 
     const handleSelect = (category: Category) => {
         onSelect(category);
+        setSearch('');
+        onClose();
+    };
+
+    const handleClose = () => {
+        setSearch('');
         onClose();
     };
 
@@ -131,15 +160,26 @@ export function CategoryPicker({
     return (
         <BottomSheet
             open={open}
-            onClose={onClose}
+            onClose={handleClose}
             title={title}
             height="70vh"
         >
+            {/* Search input */}
+            <div style={{ marginBottom: 16 }}>
+                <Input
+                    placeholder="Buscar categoría..."
+                    prefix={<SearchOutlined style={{ color: 'var(--ant-color-text-quaternary)' }} />}
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    allowClear
+                />
+            </div>
+
             {isEmpty ? (
                 <div style={{ padding: '24px 0' }}>
                     <Empty
                         image={Empty.PRESENTED_IMAGE_SIMPLE}
-                        description="No hay categorías disponibles"
+                        description={search ? `No se encontró "${search}"` : 'No hay categorías disponibles'}
                     />
                 </div>
             ) : (
