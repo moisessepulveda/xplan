@@ -68,12 +68,12 @@ export function TransactionItem({ transaction, onClick }: Props) {
                         width: 44,
                         height: 44,
                         borderRadius: 12,
-                        backgroundColor: `${transaction.type_color}15`,
+                        backgroundColor: transaction.category?.color || `${transaction.type_color}15`,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontSize: 18,
-                        color: transaction.type_color,
+                        color: transaction.category?.color ? '#fff' : transaction.type_color,
                     }}
                 >
                     {transaction.category?.icon

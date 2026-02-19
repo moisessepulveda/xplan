@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Head, router } from '@inertiajs/react';
-import { Button, Card, Typography, Input, Row, Col, List, Tag, Space, Popconfirm } from 'antd';
+import { Button, Card, Typography, Input, Row, Col, List, Tag, Space, Popconfirm, Avatar } from 'antd';
 import {
     PlusOutlined,
     FilterOutlined,
@@ -11,6 +11,7 @@ import {
     CloseOutlined,
     MailOutlined,
 } from '@ant-design/icons';
+import * as Icons from '@ant-design/icons';
 import { AppLayout } from '@/app/components/common/AppLayout';
 import { TransactionList, TransactionFilters } from '@/app/components/transactions';
 import {
@@ -54,6 +55,12 @@ export default function TransactionsIndex({
             currency: planning?.currency || 'CLP',
             maximumFractionDigits: planning?.show_decimals ? 2 : 0,
         }).format(amount);
+    };
+
+    const getIconComponent = (iconName?: string) => {
+        if (!iconName) return null;
+        const IconComponent = (Icons as Record<string, React.ComponentType<{ style?: React.CSSProperties }>>)[iconName];
+        return IconComponent ? <IconComponent style={{ color: '#fff', fontSize: 16 }} /> : null;
     };
 
     const handleSelectTransaction = (transaction: Transaction) => {
@@ -235,6 +242,15 @@ export default function TransactionsIndex({
                                     ]}
                                 >
                                     <List.Item.Meta
+                                        avatar={
+                                            <Avatar
+                                                size={40}
+                                                style={{
+                                                    backgroundColor: tx.category?.color || (tx.type === 'expense' ? colors.error[500] : colors.success[500]),
+                                                }}
+                                                icon={getIconComponent(tx.category?.icon)}
+                                            />
+                                        }
                                         title={
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                                 <Typography.Text
