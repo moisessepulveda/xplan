@@ -7,6 +7,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PlanningController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Middleware\EnsureActivePlanning;
 use Illuminate\Support\Facades\Route;
 
@@ -78,5 +79,10 @@ Route::middleware('auth')->group(function () {
         Route::post('categories/{category}/archive', [CategoryController::class, 'archive'])->name('categories.archive');
         Route::post('categories/{category}/restore', [CategoryController::class, 'restore'])->name('categories.restore');
         Route::post('categories/reorder', [CategoryController::class, 'reorder'])->name('categories.reorder');
+
+        // Transactions
+        Route::resource('transactions', TransactionController::class);
+        Route::post('transactions/{transaction}/duplicate', [TransactionController::class, 'duplicate'])->name('transactions.duplicate');
+        Route::get('transactions-recurring', [TransactionController::class, 'recurring'])->name('transactions.recurring');
     });
 });

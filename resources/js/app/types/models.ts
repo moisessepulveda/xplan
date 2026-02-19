@@ -125,8 +125,11 @@ export interface CategoryTypeOption {
 
 export interface Transaction {
   id: number;
-  planning_id: number;
+  planning_id?: number;
   type: TransactionType;
+  type_label: string;
+  type_color: string;
+  type_icon: string;
   amount: number;
   account_id: number;
   destination_account_id?: number;
@@ -137,15 +140,57 @@ export interface Transaction {
   is_recurring: boolean;
   tags: string[];
   attachments: string[];
-  created_by_id: number;
+  created_by: number;
   created_at: string;
+  updated_at: string;
   account?: Account;
   destination_account?: Account;
   category?: Category;
-  created_by?: User;
+  creator?: User;
 }
 
-export type TransactionType = 'income' | 'expense' | 'transfer' | 'adjustment';
+export type TransactionType = 'income' | 'expense' | 'transfer';
+
+export interface TransactionTypeOption {
+  value: TransactionType;
+  label: string;
+  color: string;
+  icon: string;
+}
+
+export interface TransactionSummary {
+  monthly_income: number;
+  monthly_expense: number;
+  monthly_balance: number;
+}
+
+export type FrequencyType = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'yearly';
+
+export interface FrequencyOption {
+  value: FrequencyType;
+  label: string;
+}
+
+export interface RecurringTransaction {
+  id: number;
+  planning_id?: number;
+  type: TransactionType;
+  amount: number;
+  account_id: number;
+  destination_account_id?: number;
+  category_id?: number;
+  description?: string;
+  frequency: FrequencyType;
+  start_date: string;
+  end_date?: string;
+  next_run_date: string;
+  last_run_date?: string;
+  is_active: boolean;
+  tags: string[];
+  account?: Account;
+  destination_account?: Account;
+  category?: Category;
+}
 
 export interface Receivable {
   id: number;
