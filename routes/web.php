@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EmailAccountController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\PlanningController;
 use App\Http\Controllers\TransactionController;
@@ -158,5 +159,20 @@ Route::middleware('auth')->group(function () {
         Route::put('settings/password', [SettingsController::class, 'updatePassword'])->name('settings.update-password');
         Route::get('settings/preferences', [SettingsController::class, 'preferences'])->name('settings.preferences');
         Route::put('settings/preferences', [SettingsController::class, 'updatePreferences'])->name('settings.update-preferences');
+
+        // Email Accounts (Cuentas de Correo para Sincronización)
+        Route::prefix('settings/email-accounts')->name('email-accounts.')->group(function () {
+            Route::get('/', [EmailAccountController::class, 'index'])->name('index');
+            Route::get('/create', [EmailAccountController::class, 'create'])->name('create');
+            Route::post('/', [EmailAccountController::class, 'store'])->name('store');
+            Route::get('/{emailAccount}/edit', [EmailAccountController::class, 'edit'])->name('edit');
+            Route::put('/{emailAccount}', [EmailAccountController::class, 'update'])->name('update');
+            Route::delete('/{emailAccount}', [EmailAccountController::class, 'destroy'])->name('destroy');
+            Route::post('/test-connection', [EmailAccountController::class, 'testConnection'])->name('test-connection');
+            Route::post('/{emailAccount}/sync', [EmailAccountController::class, 'sync'])->name('sync');
+            Route::post('/sync-all', [EmailAccountController::class, 'syncAll'])->name('sync-all');
+            Route::get('/{emailAccount}/transactions', [EmailAccountController::class, 'transactions'])->name('transactions');
+            Route::post('/{emailAccount}/toggle-active', [EmailAccountController::class, 'toggleActive'])->name('toggle-active');
+        });
     });
 });

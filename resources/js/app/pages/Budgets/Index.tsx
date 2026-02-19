@@ -139,21 +139,20 @@ export default function BudgetsIndex({ budget, progress, alertLines, period }: P
                 {alertLines.length > 0 && (
                     <div
                         style={{
-                            backgroundColor: colors.warning.light,
+                            backgroundColor: 'var(--ant-color-warning-bg)',
                             borderRadius: 12,
                             padding: 12,
                             marginBottom: 16,
-                            border: `1px solid ${colors.warning.main}33`,
+                            border: '1px solid var(--ant-color-warning-border)',
                         }}
                     >
-                        <Typography.Text strong style={{ fontSize: 13, display: 'block', marginBottom: 4 }}>
+                        <Typography.Text strong style={{ fontSize: 13, display: 'block', marginBottom: 4, color: 'var(--ant-color-warning)' }}>
                             Alertas de presupuesto
                         </Typography.Text>
                         {alertLines.map((line) => (
                             <Typography.Text
                                 key={line.id}
-                                type="secondary"
-                                style={{ fontSize: 12, display: 'block' }}
+                                style={{ fontSize: 12, display: 'block', color: 'var(--ant-color-text-secondary)' }}
                             >
                                 {line.category?.name}: {line.percentage.toFixed(1)}% utilizado
                             </Typography.Text>

@@ -76,7 +76,7 @@ export function BudgetHistoryList({ histories, formatCurrency }: BudgetHistoryPr
                                     justifyContent: 'space-between',
                                     alignItems: 'center',
                                     padding: '4px 0',
-                                    borderBottom: idx < history.lines_snapshot.length - 1 ? '1px solid #f5f5f5' : 'none',
+                                    borderBottom: idx < history.lines_snapshot.length - 1 ? '1px solid var(--ant-color-border-secondary)' : 'none',
                                 }}
                             >
                                 <Typography.Text style={{ fontSize: 13 }}>
@@ -105,7 +105,7 @@ export function BudgetHistoryList({ histories, formatCurrency }: BudgetHistoryPr
         <Collapse
             items={items}
             ghost
-            style={{ backgroundColor: '#fff', borderRadius: 12 }}
+            style={{ backgroundColor: 'var(--ant-color-bg-container)', borderRadius: 12 }}
         />
     );
 }

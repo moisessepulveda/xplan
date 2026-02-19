@@ -4,6 +4,7 @@ import { WarningOutlined, ExclamationCircleOutlined } from '@ant-design/icons';
 import { ProgressBar } from './ProgressBar';
 import type { BudgetProgressLine } from '@/app/types';
 import { colors } from '@/app/styles/theme';
+import { getIcon } from '@/app/utils/icons';
 
 interface BudgetCategoryCardProps {
     line: BudgetProgressLine;
@@ -29,7 +30,7 @@ export function BudgetCategoryCard({ line, formatCurrency, onClick }: BudgetCate
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
                     {line.category?.icon && (
-                        <span style={{ fontSize: 18 }}>{line.category.icon}</span>
+                        <span style={{ fontSize: 18 }}>{getIcon(line.category.icon)}</span>
                     )}
                     <div style={{ flex: 1 }}>
                         <Typography.Text strong style={{ fontSize: 14, display: 'block' }}>

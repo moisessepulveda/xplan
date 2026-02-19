@@ -628,3 +628,86 @@ export interface DebtReport {
   };
   total_debt: number;
 }
+
+// Email Account Types
+export type EmailProvider = 'gmail' | 'outlook' | 'yahoo' | 'icloud' | 'custom';
+export type EmailTransactionStatus = 'pending' | 'processed' | 'ignored' | 'failed';
+export type EmailSyncMode = 'new_only' | 'unread_7_days';
+
+export interface EmailProviderOption {
+  value: EmailProvider;
+  label: string;
+  icon: string;
+  imap_config: {
+    host: string;
+    port: number;
+    encryption: string;
+  };
+  help_text: string;
+}
+
+export interface EmailSyncModeOption {
+  value: EmailSyncMode;
+  label: string;
+  description: string;
+}
+
+export interface EmailAccount {
+  id: number;
+  planning_id: number;
+  name: string;
+  email: string;
+  provider: EmailProvider;
+  provider_label: string;
+  provider_icon: string;
+  imap_host: string;
+  imap_port: number;
+  imap_encryption: string;
+  folder: string;
+  last_sync_at?: string;
+  last_sync_at_human?: string;
+  last_sync_error?: string;
+  is_active: boolean;
+  is_syncing: boolean;
+  sync_started_at?: string;
+  sync_started_at_human?: string;
+  sync_frequency: number;
+  sync_mode?: EmailSyncMode;
+  sync_mode_label?: string;
+  initial_sync_done: boolean;
+  created_at: string;
+  email_transactions_count?: number;
+  recent_transactions?: EmailTransaction[];
+}
+
+export interface EmailTransaction {
+  id: number;
+  email_account_id: number;
+  message_uid: string;
+  subject?: string;
+  from_email?: string;
+  received_at?: string;
+  received_at_human?: string;
+  parsed_data?: EmailParsedData;
+  transaction_id?: number;
+  status: EmailTransactionStatus;
+  status_label: string;
+  status_color: string;
+  status_icon: string;
+  error_message?: string;
+  is_transaction: boolean;
+  confidence: number;
+  created_at: string;
+  transaction?: Transaction;
+}
+
+export interface EmailParsedData {
+  is_transaction: boolean;
+  type?: 'expense' | 'income';
+  amount?: number;
+  description?: string;
+  merchant?: string;
+  date?: string;
+  suggested_category_id?: number;
+  confidence: number;
+}

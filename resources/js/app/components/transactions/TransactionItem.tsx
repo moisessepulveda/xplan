@@ -9,6 +9,7 @@ import {
 import { Transaction } from '@/app/types';
 import { usePlanning } from '@/app/hooks/usePlanning';
 import { colors } from '@/app/styles/theme';
+import { getIcon } from '@/app/utils/icons';
 
 interface Props {
     transaction: Transaction;
@@ -76,7 +77,7 @@ export function TransactionItem({ transaction, onClick }: Props) {
                     }}
                 >
                     {transaction.category?.icon
-                        ? <span>{transaction.category.icon}</span>
+                        ? getIcon(transaction.category.icon)
                         : typeIconMap[transaction.type_icon] || <ArrowDownOutlined />
                     }
                 </div>

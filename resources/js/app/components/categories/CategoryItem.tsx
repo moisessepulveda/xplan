@@ -2,6 +2,7 @@ import React from 'react';
 import { Typography, Tag, Button } from 'antd';
 import { EditOutlined, RightOutlined } from '@ant-design/icons';
 import { Category } from '@/app/types';
+import { getIcon } from '@/app/utils/icons';
 
 interface Props {
     category: Category;
@@ -41,13 +42,9 @@ export function CategoryItem({ category, onEdit, onClick, showChildren = true }:
                         fontSize: 18,
                     }}
                 >
-                    {category.icon ? (
-                        <span style={{ color: '#fff' }}>{category.icon}</span>
-                    ) : (
-                        <span style={{ color: '#fff' }}>
-                            {category.name.charAt(0).toUpperCase()}
-                        </span>
-                    )}
+                    <span style={{ color: '#fff' }}>
+                        {getIcon(category.icon)}
+                    </span>
                 </div>
 
                 <div style={{ flex: 1 }}>

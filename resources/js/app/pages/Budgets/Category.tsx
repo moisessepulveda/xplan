@@ -6,6 +6,7 @@ import { ProgressBar } from '@/app/components/budgets';
 import type { Budget, BudgetProgressLine, Transaction } from '@/app/types';
 import { usePlanning } from '@/app/hooks/usePlanning';
 import { colors } from '@/app/styles/theme';
+import { getIcon } from '@/app/utils/icons';
 
 interface Props {
     budget: Budget;
@@ -57,7 +58,7 @@ export default function BudgetsCategory({ budget, categoryLine, transactions, pe
                 >
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                         {categoryLine.category?.icon && (
-                            <span style={{ fontSize: 24 }}>{categoryLine.category.icon}</span>
+                            <span style={{ fontSize: 24, color: '#fff' }}>{getIcon(categoryLine.category.icon)}</span>
                         )}
                         <Typography.Title level={4} style={{ color: '#fff', margin: 0 }}>
                             {categoryLine.category?.name}

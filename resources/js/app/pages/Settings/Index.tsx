@@ -12,6 +12,8 @@ import {
     LogoutOutlined,
     RightOutlined,
     DownloadOutlined,
+    AppstoreOutlined,
+    MailOutlined,
 } from '@ant-design/icons';
 import { AppLayout } from '@/app/components/common/AppLayout';
 import { useAuth } from '@/app/hooks/useAuth';
@@ -85,6 +87,24 @@ export default function SettingsIndex({ user }: Props) {
             color: colors.info.main,
             bg: colors.info.light,
             route: '/accounts',
+        },
+        {
+            key: 'categories',
+            label: 'Categorías',
+            description: 'Ingresos y gastos',
+            icon: <AppstoreOutlined />,
+            color: '#722ed1',
+            bg: '#f9f0ff',
+            route: '/categories',
+        },
+        {
+            key: 'email-accounts',
+            label: 'Sincronización de Correos',
+            description: 'Detecta transacciones automáticamente',
+            icon: <MailOutlined />,
+            color: '#1677ff',
+            bg: '#e6f4ff',
+            route: '/settings/email-accounts',
         },
         {
             key: 'credits',

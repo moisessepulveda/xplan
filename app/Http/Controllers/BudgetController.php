@@ -13,6 +13,7 @@ use App\Models\Budget;
 use App\Models\BudgetHistory;
 use App\Models\Category;
 use App\Services\BudgetCalculator;
+use App\Services\BudgetSnapshotService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -21,7 +22,8 @@ use Inertia\Response;
 class BudgetController extends Controller
 {
     public function __construct(
-        private BudgetCalculator $calculator
+        private BudgetCalculator $calculator,
+        private BudgetSnapshotService $snapshotService
     ) {}
 
     public function index(Request $request): Response
@@ -55,12 +57,29 @@ class BudgetController extends Controller
 
         $categories = Category::where('type', 'expense')
             ->where('is_archived', false)
+            ->whereNull('parent_id')
+            ->with(['children' => function ($query) {
+                $query->where('is_archived', false)->orderBy('order');
+            }])
             ->orderBy('order')
             ->get();
 
+        // Get unclosed periods if budget exists
+        $unclosedPeriods = [];
+        if ($budget) {
+            $unclosedPeriods = $this->snapshotService->getUnclosedPeriods($budget)
+                ->map(fn($period) => [
+                    'period' => $period,
+                    'label' => $this->snapshotService->formatPeriod($period),
+                ])
+                ->values()
+                ->toArray();
+        }
+
         return Inertia::render('Budgets/Configure', [
             'budget' => $budget ? new BudgetResource($budget) : null,
-            'categories' => $categories,
+            'categories' => \App\Http\Resources\CategoryResource::collection($categories),
+            'unclosedPeriods' => $unclosedPeriods,
         ]);
     }
 

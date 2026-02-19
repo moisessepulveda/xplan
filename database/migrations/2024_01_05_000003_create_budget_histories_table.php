@@ -15,7 +15,7 @@ return new class extends Migration
             $table->decimal('total_budgeted', 15, 2);
             $table->decimal('total_spent', 15, 2);
             $table->json('lines_snapshot');
-            $table->timestamp('closed_at');
+            $table->timestamp('closed_at')->nullable();
             $table->timestamps();
 
             $table->unique(['budget_id', 'period']);

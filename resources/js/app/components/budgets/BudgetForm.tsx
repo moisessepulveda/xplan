@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Form, Input, Select, Button, Typography, Empty } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { BudgetLineItem, type BudgetLineFormData } from './BudgetLineItem';
+import { CategoryPicker } from '@/app/components/common/CategoryPicker';
 import type { Category, Budget } from '@/app/types';
 
 interface BudgetFormProps {
@@ -9,11 +10,13 @@ interface BudgetFormProps {
     categories: Category[];
     processing: boolean;
     onSubmit: (data: { name: string; type: string; lines: BudgetLineFormData[] }) => void;
+    disabled?: boolean;
 }
 
-export function BudgetForm({ budget, categories, processing, onSubmit }: BudgetFormProps) {
+export function BudgetForm({ budget, categories, processing, onSubmit, disabled = false }: BudgetFormProps) {
     const [name, setName] = useState(budget?.name || '');
     const [type, setType] = useState(budget?.type || 'monthly');
+    const [showCategoryPicker, setShowCategoryPicker] = useState(false);
     const [lines, setLines] = useState<BudgetLineFormData[]>(
         budget?.lines?.map((l) => ({
             id: l.id,
@@ -28,16 +31,30 @@ export function BudgetForm({ budget, categories, processing, onSubmit }: BudgetF
     );
 
     const usedCategoryIds = lines.map((l) => l.category_id);
-    const availableCategories = categories.filter((c) => !usedCategoryIds.includes(c.id));
 
-    const handleAddLine = (categoryId: number) => {
-        const category = categories.find((c) => c.id === categoryId);
-        if (!category) return;
+    // Filter available categories (not already used) - including children
+    const availableCategories = useMemo(() => {
+        return categories
+            .map((cat) => ({
+                ...cat,
+                children: cat.children?.filter((child) => !usedCategoryIds.includes(child.id)) || [],
+            }))
+            .filter((cat) => {
+                const parentAvailable = !usedCategoryIds.includes(cat.id);
+                const hasAvailableChildren = cat.children && cat.children.length > 0;
+                return parentAvailable || hasAvailableChildren;
+            });
+    }, [categories, usedCategoryIds]);
+
+    const hasAvailableCategories = availableCategories.length > 0;
+
+    const handleAddLine = (category: Category) => {
+        if (usedCategoryIds.includes(category.id)) return;
 
         setLines([
             ...lines,
             {
-                category_id: categoryId,
+                category_id: category.id,
                 category_name: category.name,
                 amount: 0,
                 alert_at_50: false,
@@ -72,6 +89,7 @@ export function BudgetForm({ budget, categories, processing, onSubmit }: BudgetF
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Ej: Presupuesto Mensual"
                         size="large"
+                        disabled={disabled}
                     />
                 </Form.Item>
 
@@ -84,6 +102,7 @@ export function BudgetForm({ budget, categories, processing, onSubmit }: BudgetF
                             { value: 'custom', label: 'Personalizado' },
                         ]}
                         size="large"
+                        disabled={disabled}
                     />
                 </Form.Item>
             </Form>
@@ -110,29 +129,31 @@ export function BudgetForm({ budget, categories, processing, onSubmit }: BudgetF
                             categories={categories}
                             onChange={(data) => handleUpdateLine(index, data)}
                             onRemove={() => handleRemoveLine(index)}
+                            disabled={disabled}
                         />
                     ))
                 )}
 
-                {availableCategories.length > 0 && (
-                    <Select
-                        placeholder="Agregar categoría..."
-                        value={undefined}
-                        onChange={handleAddLine}
-                        options={availableCategories.map((c) => ({
-                            value: c.id,
-                            label: (
-                                <span>
-                                    {c.icon && <span style={{ marginRight: 8 }}>{c.icon}</span>}
-                                    {c.name}
-                                </span>
-                            ),
-                        }))}
+                {hasAvailableCategories && (
+                    <Button
+                        type="dashed"
+                        icon={<PlusOutlined />}
+                        onClick={() => setShowCategoryPicker(true)}
                         style={{ width: '100%', marginTop: 8 }}
                         size="large"
-                        suffixIcon={<PlusOutlined />}
-                    />
+                        disabled={disabled}
+                    >
+                        Agregar categoría
+                    </Button>
                 )}
+
+                <CategoryPicker
+                    open={showCategoryPicker}
+                    onClose={() => setShowCategoryPicker(false)}
+                    onSelect={handleAddLine}
+                    categories={availableCategories}
+                    title="Agregar categoría al presupuesto"
+                />
             </div>
 
             <Button
@@ -141,7 +162,7 @@ export function BudgetForm({ budget, categories, processing, onSubmit }: BudgetF
                 block
                 onClick={handleSubmit}
                 loading={processing}
-                disabled={!name || lines.length === 0 || lines.some((l) => !l.amount)}
+                disabled={disabled || !name || lines.length === 0 || lines.some((l) => !l.amount)}
             >
                 {budget ? 'Actualizar Presupuesto' : 'Crear Presupuesto'}
             </Button>

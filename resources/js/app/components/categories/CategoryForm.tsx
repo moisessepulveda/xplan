@@ -1,6 +1,7 @@
 import React from 'react';
-import { Form, Input, Select, Button } from 'antd';
+import { Form, Input, Select, Button, Typography } from 'antd';
 import { Category, CategoryTypeOption } from '@/app/types';
+import { iconCategories, getIcon } from '@/app/utils/icons';
 
 interface Props {
     category?: Category;
@@ -23,19 +24,6 @@ const colorOptions = [
     '#1677ff', '#52c41a', '#eb2f96', '#722ed1', '#fa8c16',
     '#13c2c2', '#f5222d', '#faad14', '#2f54eb', '#a0d911',
     '#597ef7', '#36cfc9', '#ffc53d', '#ff7a45', '#9254de',
-];
-
-const iconOptions = [
-    { value: 'dollar', label: '💵 Dinero' },
-    { value: 'shopping-cart', label: '🛒 Compras' },
-    { value: 'home', label: '🏠 Hogar' },
-    { value: 'car', label: '🚗 Transporte' },
-    { value: 'heart', label: '❤️ Salud' },
-    { value: 'book', label: '📚 Educación' },
-    { value: 'smile', label: '😊 Entretenimiento' },
-    { value: 'gift', label: '🎁 Regalos' },
-    { value: 'coffee', label: '☕ Comida' },
-    { value: 'star', label: '⭐ Otros' },
 ];
 
 export function CategoryForm({
@@ -125,9 +113,31 @@ export function CategoryForm({
                     size="large"
                     value={data.icon}
                     onChange={(value) => setData('icon', value)}
-                    options={iconOptions}
                     placeholder="Selecciona un icono"
-                />
+                    showSearch
+                    optionFilterProp="label"
+                    popupMatchSelectWidth={false}
+                    listHeight={300}
+                    optionRender={(option) => (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontSize: 18 }}>{getIcon(option.value as string)}</span>
+                            <span>{option.label}</span>
+                        </div>
+                    )}
+                >
+                    {iconCategories.map((category) => (
+                        <Select.OptGroup key={category.label} label={category.label}>
+                            {category.icons.map((icon) => (
+                                <Select.Option key={icon.value} value={icon.value} label={icon.label}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                        <span style={{ fontSize: 18 }}>{getIcon(icon.value)}</span>
+                                        <span>{icon.label}</span>
+                                    </div>
+                                </Select.Option>
+                            ))}
+                        </Select.OptGroup>
+                    ))}
+                </Select>
             </Form.Item>
 
             <Form.Item label="Color">

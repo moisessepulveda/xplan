@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Form, Input, InputNumber, Select, DatePicker, Button, Segmented } from 'antd';
 import {
     ArrowUpOutlined,
     ArrowDownOutlined,
     SwapOutlined,
+    RightOutlined,
 } from '@ant-design/icons';
 import { Transaction, TransactionTypeOption, Account, Category } from '@/app/types';
 import { usePlanning } from '@/app/hooks/usePlanning';
 import { colors } from '@/app/styles/theme';
+import { CategoryPicker } from '@/app/components/common/CategoryPicker';
+import { getIcon } from '@/app/utils/icons';
 import dayjs from 'dayjs';
 
 interface Props {
@@ -56,23 +59,24 @@ export function TransactionForm({
     onSubmit,
 }: Props) {
     const { planning } = usePlanning();
+    const [showCategoryPicker, setShowCategoryPicker] = useState(false);
     const isTransfer = data.type === 'transfer';
 
-    // Flatten categories and filter by transaction type
-    const filteredCategories = categories.flatMap((cat) => {
-        const items = [];
-        const isMatchingType =
-            (data.type === 'income' && cat.type === 'income') ||
-            (data.type === 'expense' && cat.type === 'expense');
-
-        if (isMatchingType) {
-            items.push(cat);
+    // Find the selected category
+    const selectedCategory = useMemo(() => {
+        if (!data.category_id) return null;
+        for (const cat of categories) {
+            if (cat.id === data.category_id) return cat;
             if (cat.children) {
-                items.push(...cat.children);
+                const child = cat.children.find((c) => c.id === data.category_id);
+                if (child) return child;
             }
         }
-        return items;
-    });
+        return null;
+    }, [categories, data.category_id]);
+
+    // Get transaction type for filtering categories
+    const categoryType = data.type === 'income' ? 'income' : data.type === 'expense' ? 'expense' : undefined;
 
     return (
         <Form layout="vertical" onFinish={onSubmit}>
@@ -181,20 +185,59 @@ export function TransactionForm({
                     validateStatus={errors.category_id ? 'error' : ''}
                     help={errors.category_id}
                 >
-                    <Select
-                        size="large"
-                        allowClear
-                        placeholder="Seleccionar categoría"
-                        value={data.category_id}
-                        onChange={(value) => setData('category_id', value)}
-                        options={filteredCategories.map((c) => ({
-                            value: c.id,
-                            label: c.parent_id ? `  ${c.name}` : c.name,
-                            style: c.parent_id ? { paddingLeft: 24 } : {},
-                        }))}
-                    />
+                    <div
+                        onClick={() => setShowCategoryPicker(true)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '8px 12px',
+                            border: '1px solid var(--ant-color-border)',
+                            borderRadius: 8,
+                            cursor: 'pointer',
+                            minHeight: 40,
+                            backgroundColor: 'var(--ant-color-bg-container)',
+                            transition: 'border-color 0.2s',
+                        }}
+                    >
+                        {selectedCategory ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <div
+                                    style={{
+                                        width: 32,
+                                        height: 32,
+                                        borderRadius: '50%',
+                                        backgroundColor: selectedCategory.color || selectedCategory.type_color || colors.primary[500],
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: '#fff',
+                                        fontSize: 14,
+                                    }}
+                                >
+                                    {getIcon(selectedCategory.icon)}
+                                </div>
+                                <span>{selectedCategory.full_name || selectedCategory.name}</span>
+                            </div>
+                        ) : (
+                            <span style={{ color: 'var(--ant-color-text-placeholder)' }}>
+                                Seleccionar categoría
+                            </span>
+                        )}
+                        <RightOutlined style={{ color: 'var(--ant-color-text-tertiary)', fontSize: 12 }} />
+                    </div>
                 </Form.Item>
             )}
+
+            {/* Category Picker */}
+            <CategoryPicker
+                open={showCategoryPicker}
+                onClose={() => setShowCategoryPicker(false)}
+                onSelect={(category) => setData('category_id', category.id)}
+                categories={categories}
+                selectedId={data.category_id}
+                type={categoryType}
+            />
 
             {/* Date */}
             <Form.Item

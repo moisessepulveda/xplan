@@ -130,6 +130,6 @@ class User extends Authenticatable
             ->where('planning_id', $planning->id)
             ->first();
 
-        return $membership ? MemberRole::from($membership->role) : null;
+        return $membership?->role;
     }
 }

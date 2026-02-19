@@ -4,7 +4,9 @@ namespace App\Services;
 
 use App\Enums\TransactionType;
 use App\Models\Budget;
+use App\Models\BudgetHistory;
 use App\Models\BudgetLine;
+use App\Models\Category;
 use App\Models\Transaction;
 use Illuminate\Support\Collection;
 
@@ -15,10 +17,71 @@ class BudgetCalculator
         $period = $period ?? now()->format('Y-m');
         [$year, $month] = explode('-', $period);
 
+        // Check if there's a closed snapshot for this period
+        $snapshot = BudgetHistory::where('budget_id', $budget->id)
+            ->where('period', $period)
+            ->whereNotNull('closed_at')
+            ->first();
+
+        if ($snapshot) {
+            // Use snapshot data for closed periods
+            return $this->calculateFromSnapshot($snapshot, (int) $year, (int) $month);
+        }
+
+        // No closed snapshot, use current budget lines
+        return $this->calculateFromBudget($budget, $period, (int) $year, (int) $month);
+    }
+
+    private function calculateFromSnapshot(BudgetHistory $snapshot, int $year, int $month): array
+    {
+        $linesWithSpent = collect($snapshot->lines_snapshot)->map(function ($line) use ($year, $month) {
+            $spent = (float) ($line['spent'] ?? 0);
+            $amount = (float) $line['amount'];
+            $percentage = $amount > 0
+                ? round(($spent / $amount) * 100, 1)
+                : 0;
+
+            $category = Category::find($line['category_id']);
+
+            return [
+                'id' => $line['category_id'],
+                'category_id' => $line['category_id'],
+                'category' => $category,
+                'amount' => $amount,
+                'spent' => $spent,
+                'remaining' => max(0, $amount - $spent),
+                'percentage' => $percentage,
+                'alert_at_50' => $line['alert_at_50'] ?? false,
+                'alert_at_80' => $line['alert_at_80'] ?? true,
+                'alert_at_100' => $line['alert_at_100'] ?? true,
+                'status' => $this->getLineStatus($percentage),
+                'notes' => null,
+            ];
+        });
+
+        $totalBudgeted = (float) $snapshot->total_budgeted;
+        $totalSpent = (float) $snapshot->total_spent;
+
+        return [
+            'budget' => $snapshot->budget,
+            'period' => $snapshot->period,
+            'lines' => $linesWithSpent,
+            'total_budgeted' => $totalBudgeted,
+            'total_spent' => $totalSpent,
+            'total_remaining' => max(0, $totalBudgeted - $totalSpent),
+            'total_percentage' => $totalBudgeted > 0
+                ? round(($totalSpent / $totalBudgeted) * 100, 1)
+                : 0,
+            'is_closed' => true,
+        ];
+    }
+
+    private function calculateFromBudget(Budget $budget, string $period, int $year, int $month): array
+    {
         $lines = $budget->lines()->with('category')->get();
 
         $linesWithSpent = $lines->map(function (BudgetLine $line) use ($year, $month) {
-            $spent = $this->getSpentForCategory((int) $line->category_id, (int) $year, (int) $month);
+            $spent = $this->getSpentForCategory((int) $line->category_id, $year, $month);
             $percentage = (float) $line->amount > 0
                 ? round(($spent / (float) $line->amount) * 100, 1)
                 : 0;
@@ -52,6 +115,7 @@ class BudgetCalculator
             'total_percentage' => $totalBudgeted > 0
                 ? round(($totalSpent / $totalBudgeted) * 100, 1)
                 : 0,
+            'is_closed' => false,
         ];
     }
 

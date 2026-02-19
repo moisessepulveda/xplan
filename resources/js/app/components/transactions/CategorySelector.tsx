@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal, List, Typography, Empty } from 'antd';
 import { Category } from '@/app/types';
+import { getIcon } from '@/app/utils/icons';
 
 interface Props {
     open: boolean;
@@ -75,7 +76,7 @@ export function CategorySelector({
                                                 fontSize: 16,
                                             }}
                                         >
-                                            {category.icon || category.name.charAt(0).toUpperCase()}
+                                            {getIcon(category.icon)}
                                         </div>
                                     }
                                     title={category.name}
