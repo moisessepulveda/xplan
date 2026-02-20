@@ -59,7 +59,7 @@ class TransactionController extends Controller
             ->when($filters['type'] ?? null, fn($q, $type) => $q->where('type', $type))
             ->when($filters['account_id'] ?? null, fn($q, $id) => $q->forAccount($id))
             ->when($filters['category_id'] ?? null, fn($q, $id) => $q->forCategory($id))
-            ->when($filters['search'] ?? null, fn($q, $search) => $q->where('description', 'ilike', "%{$search}%"))
+            ->when($filters['search'] ?? null, fn($q, $search) => $q->where('description', 'like', "%{$search}%"))
             ->orderBy($filters['sort'] ?? 'date', $filters['direction'] ?? 'desc')
             ->orderBy('created_at', 'desc');
 

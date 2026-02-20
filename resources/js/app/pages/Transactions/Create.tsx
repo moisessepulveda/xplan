@@ -1,9 +1,15 @@
 import React from 'react';
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { Card } from 'antd';
+import dayjs from 'dayjs';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
 import { AppLayout } from '@/app/components/common/AppLayout';
 import { TransactionForm } from '@/app/components/transactions';
 import { TransactionTypeOption, Account, Category, RecurringTransaction } from '@/app/types';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 interface Props {
     transactionTypes: TransactionTypeOption[];
@@ -21,9 +27,7 @@ export default function CreateTransaction({ transactionTypes, accounts, categori
 
     // Determine default values
     const defaultType = fromRecurring?.type || urlType || 'expense';
-    const defaultDate = period
-        ? `${period}-01`
-        : new Date().toISOString().split('T')[0];
+    const defaultDate = dayjs().tz('America/Santiago').format('YYYY-MM-DD');
 
     const { data, setData, post, processing, errors } = useForm({
         type: defaultType,
