@@ -85,16 +85,20 @@ export function BottomNavigation() {
                     bottom: 0,
                     left: 0,
                     right: 0,
-                    height: 56,
-                    paddingBottom: 'env(safe-area-inset-bottom)',
                     backgroundColor: isDark ? colors.neutral[900] : colors.neutral[0],
                     borderTop: `1px solid ${isDark ? colors.neutral[800] : colors.neutral[200]}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-around',
+                    paddingBottom: 'env(safe-area-inset-bottom, 0px)',
                     zIndex: 100,
                 }}
             >
+                <div
+                    style={{
+                        height: 56,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-around',
+                    }}
+                >
                 {navItems.map((item) => {
                     const active = isActive(item.path);
 
@@ -154,6 +158,7 @@ export function BottomNavigation() {
                         </button>
                     );
                 })}
+                </div>
             </nav>
 
             <QuickActions

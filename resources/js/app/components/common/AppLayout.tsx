@@ -57,7 +57,9 @@ export function AppLayout({
             <main
                 style={{
                     flex: 1,
-                    paddingBottom: showBottomNav ? 72 : 16,
+                    paddingBottom: showBottomNav
+                        ? 'calc(72px + env(safe-area-inset-bottom, 0px))'
+                        : 16,
                     overflowY: 'auto',
                 }}
             >
