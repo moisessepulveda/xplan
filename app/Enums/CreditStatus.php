@@ -22,10 +22,10 @@ enum CreditStatus: string
     public function color(): string
     {
         return match ($this) {
-            self::ACTIVE => '#1677ff',
-            self::PAID => '#52c41a',
-            self::REFINANCED => '#faad14',
-            self::DEFAULTED => '#ff4d4f',
+            self::ACTIVE => 'processing',
+            self::PAID => 'success',
+            self::REFINANCED => 'warning',
+            self::DEFAULTED => 'error',
         };
     }
 

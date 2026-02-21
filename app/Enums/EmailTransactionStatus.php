@@ -22,10 +22,10 @@ enum EmailTransactionStatus: string
     public function color(): string
     {
         return match ($this) {
-            self::PENDING => '#faad14',
-            self::PROCESSED => '#52c41a',
-            self::IGNORED => '#8c8c8c',
-            self::FAILED => '#ff4d4f',
+            self::PENDING => 'warning',
+            self::PROCESSED => 'success',
+            self::IGNORED => 'default',
+            self::FAILED => 'error',
         };
     }
 

@@ -22,10 +22,10 @@ enum ReceivableStatus: string
     public function color(): string
     {
         return match ($this) {
-            self::PENDING => '#faad14',
-            self::PARTIAL => '#1677ff',
-            self::PAID => '#52c41a',
-            self::CANCELLED => '#8c8c8c',
+            self::PENDING => 'warning',
+            self::PARTIAL => 'processing',
+            self::PAID => 'success',
+            self::CANCELLED => 'default',
         };
     }
 

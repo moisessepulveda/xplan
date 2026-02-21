@@ -148,7 +148,7 @@ export default function SettingsIndex({ user }: Props) {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            borderBottom: index < items.length - 1 ? '1px solid #f0f0f0' : 'none',
+                            borderBottom: index < items.length - 1 ? '1px solid var(--ant-color-border)' : 'none',
                             cursor: item.route ? 'pointer' : 'default',
                         }}
                         onClick={() => {
