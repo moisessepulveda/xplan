@@ -5,6 +5,7 @@ namespace App\Actions\Transaction;
 use App\Enums\TransactionType;
 use App\Models\Account;
 use App\Models\Transaction;
+use App\Models\VirtualFund;
 use Illuminate\Support\Facades\DB;
 
 class UpdateTransactionAction
@@ -13,16 +14,21 @@ class UpdateTransactionAction
     {
         return DB::transaction(function () use ($transaction, $data) {
             $isPending = $transaction->pending_approval;
+            $oldFundId = $transaction->virtual_fund_id;
+            $oldType = $transaction->type;
+            $oldAmount = $transaction->amount;
 
             // Solo revertir saldos si la transacción NO está pendiente de aprobación
             if (!$isPending) {
                 $this->reverseBalanceImpact($transaction);
+                $this->reverseFundImpact($oldFundId, $oldType, $oldAmount);
             }
 
             $transaction->update([
                 'account_id' => $data['account_id'] ?? $transaction->account_id,
                 'destination_account_id' => $data['destination_account_id'] ?? $transaction->destination_account_id,
                 'category_id' => $data['category_id'] ?? $transaction->category_id,
+                'virtual_fund_id' => array_key_exists('virtual_fund_id', $data) ? $data['virtual_fund_id'] : $transaction->virtual_fund_id,
                 'type' => $data['type'] ?? $transaction->type,
                 'amount' => $data['amount'] ?? $transaction->amount,
                 'description' => $data['description'] ?? $transaction->description,
@@ -37,6 +43,7 @@ class UpdateTransactionAction
             // Solo aplicar saldos si la transacción NO está pendiente de aprobación
             if (!$isPending) {
                 $this->applyBalanceImpact($transaction);
+                $this->applyFundImpact($transaction);
             }
 
             return $transaction->fresh();
@@ -83,5 +90,47 @@ class UpdateTransactionAction
             $destinationAccount = Account::findOrFail($transaction->destination_account_id);
             $destinationAccount->updateBalance($transaction->amount);
         }
+    }
+
+    private function reverseFundImpact(?int $fundId, TransactionType $type, float $amount): void
+    {
+        if (!$fundId) {
+            return;
+        }
+
+        $fund = VirtualFund::find($fundId);
+        if (!$fund || $fund->is_default) {
+            return;
+        }
+
+        // Reverse the original impact: income added, expense/transfer subtracted
+        $reverseImpact = match ($type) {
+            TransactionType::INCOME => -(float) $amount,
+            TransactionType::EXPENSE => (float) $amount,
+            TransactionType::TRANSFER => (float) $amount, // Transfers subtracted, so reverse adds
+        };
+
+        $fund->updateAmount($reverseImpact);
+    }
+
+    private function applyFundImpact(Transaction $transaction): void
+    {
+        if (!$transaction->virtual_fund_id) {
+            return;
+        }
+
+        $fund = VirtualFund::find($transaction->virtual_fund_id);
+        if (!$fund || $fund->is_default) {
+            return;
+        }
+
+        // Apply impact: income adds, expense/transfer subtracts from fund
+        $impact = match ($transaction->type) {
+            TransactionType::INCOME => (float) $transaction->amount,
+            TransactionType::EXPENSE => -(float) $transaction->amount,
+            TransactionType::TRANSFER => -(float) $transaction->amount, // Sale del fondo
+        };
+
+        $fund->updateAmount($impact);
     }
 }

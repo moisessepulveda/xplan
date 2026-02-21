@@ -34,12 +34,21 @@ import {
 } from '@ant-design/icons';
 import { AppLayout } from '@/app/components/common/AppLayout';
 import { AdjustBalanceModal } from '@/app/components/accounts';
-import { Account, Transaction } from '@/app/types';
+import {
+    FundsList,
+    CreateFundModal,
+    EditFundModal,
+    FundDetailModal,
+    TransferBetweenFundsModal,
+} from '@/app/components/funds';
+import type { FundFormData, FundUpdateData, TransferData } from '@/app/components/funds';
+import { Account, Transaction, VirtualFund } from '@/app/types';
 import { usePlanning } from '@/app/hooks/usePlanning';
 import { colors } from '@/app/styles/theme';
 
 interface Props {
     account: Account;
+    virtualFunds: VirtualFund[];
     transactions: Transaction[];
 }
 
@@ -77,10 +86,20 @@ const categoryIconMap: Record<string, React.ComponentType> = {
     'swap': SwapOutlined,
 };
 
-export default function ShowAccount({ account, transactions }: Props) {
+export default function ShowAccount({ account, virtualFunds, transactions }: Props) {
     const { planning } = usePlanning();
     const [showAdjustModal, setShowAdjustModal] = useState(false);
     const [adjusting, setAdjusting] = useState(false);
+
+    // Virtual Funds state
+    const [showCreateFundModal, setShowCreateFundModal] = useState(false);
+    const [showEditFundModal, setShowEditFundModal] = useState(false);
+    const [showFundDetailModal, setShowFundDetailModal] = useState(false);
+    const [showTransferModal, setShowTransferModal] = useState(false);
+    const [selectedFund, setSelectedFund] = useState<VirtualFund | null>(null);
+    const [creatingFund, setCreatingFund] = useState(false);
+    const [updatingFund, setUpdatingFund] = useState(false);
+    const [transferring, setTransferring] = useState(false);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-CL', {
@@ -105,6 +124,67 @@ export default function ShowAccount({ account, transactions }: Props) {
                 },
             }
         );
+    };
+
+    // Virtual Funds handlers
+    const availableFund = virtualFunds.find(f => f.is_default);
+
+    const handleCreateFund = (data: FundFormData) => {
+        setCreatingFund(true);
+        router.post(`/accounts/${account.id}/funds`, data, {
+            onSuccess: () => {
+                setShowCreateFundModal(false);
+                setCreatingFund(false);
+            },
+            onError: () => setCreatingFund(false),
+        });
+    };
+
+    const handleUpdateFund = (data: FundUpdateData) => {
+        if (!selectedFund || selectedFund.id === 'available') return;
+        setUpdatingFund(true);
+        router.put(`/funds/${selectedFund.id}`, data, {
+            onSuccess: () => {
+                setShowEditFundModal(false);
+                setUpdatingFund(false);
+                setSelectedFund(null);
+            },
+            onError: () => setUpdatingFund(false),
+        });
+    };
+
+    const handleDeleteFund = () => {
+        if (!selectedFund || selectedFund.id === 'available') return;
+        router.delete(`/funds/${selectedFund.id}`, {
+            onSuccess: () => {
+                setShowEditFundModal(false);
+                setSelectedFund(null);
+            },
+        });
+    };
+
+    const handleTransfer = (data: TransferData) => {
+        setTransferring(true);
+        router.post('/funds/transfer', data, {
+            onSuccess: () => {
+                setShowTransferModal(false);
+                setTransferring(false);
+            },
+            onError: () => setTransferring(false),
+        });
+    };
+
+    const handleSelectFund = (fund: VirtualFund) => {
+        if (fund.is_default) return;
+        setSelectedFund(fund);
+        setShowFundDetailModal(true);
+    };
+
+    const handleEditFund = (fund: VirtualFund) => {
+        if (fund.is_default) return;
+        setSelectedFund(fund);
+        setShowFundDetailModal(false);
+        setShowEditFundModal(true);
     };
 
     const menuItems = [
@@ -206,6 +286,18 @@ export default function ShowAccount({ account, transactions }: Props) {
                         <Typography.Text type="secondary">Incluida en balance total</Typography.Text>
                         <Typography.Text>{account.include_in_total ? 'Sí' : 'No'}</Typography.Text>
                     </div>
+                </Card>
+
+                {/* Virtual Funds */}
+                <Card style={{ borderRadius: 12, marginBottom: 16 }}>
+                    <FundsList
+                        funds={virtualFunds}
+                        currency={account.currency}
+                        onAdd={() => setShowCreateFundModal(true)}
+                        onSelect={handleSelectFund}
+                        onEdit={handleEditFund}
+                        onTransfer={() => setShowTransferModal(true)}
+                    />
                 </Card>
 
                 {/* Recent Transactions */}
@@ -358,6 +450,52 @@ export default function ShowAccount({ account, transactions }: Props) {
                 onClose={() => setShowAdjustModal(false)}
                 onConfirm={handleAdjustBalance}
                 loading={adjusting}
+            />
+
+            <CreateFundModal
+                open={showCreateFundModal}
+                onClose={() => setShowCreateFundModal(false)}
+                onSubmit={handleCreateFund}
+                loading={creatingFund}
+                availableBalance={availableFund?.current_amount ?? account.current_balance}
+                currency={account.currency}
+            />
+
+            <FundDetailModal
+                fund={selectedFund}
+                transactions={transactions}
+                open={showFundDetailModal}
+                onClose={() => {
+                    setShowFundDetailModal(false);
+                    setSelectedFund(null);
+                }}
+                onEdit={() => {
+                    setShowFundDetailModal(false);
+                    setShowEditFundModal(true);
+                }}
+                currency={account.currency}
+            />
+
+            <EditFundModal
+                fund={selectedFund}
+                open={showEditFundModal}
+                onClose={() => {
+                    setShowEditFundModal(false);
+                    setSelectedFund(null);
+                }}
+                onSubmit={handleUpdateFund}
+                onDelete={handleDeleteFund}
+                loading={updatingFund}
+                currency={account.currency}
+            />
+
+            <TransferBetweenFundsModal
+                open={showTransferModal}
+                onClose={() => setShowTransferModal(false)}
+                onSubmit={handleTransfer}
+                loading={transferring}
+                funds={virtualFunds}
+                currency={account.currency}
             />
         </AppLayout>
     );

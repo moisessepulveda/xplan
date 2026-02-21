@@ -6,7 +6,7 @@ import {
     SwapOutlined,
     RightOutlined,
 } from '@ant-design/icons';
-import { Transaction, TransactionTypeOption, Account, Category } from '@/app/types';
+import { Transaction, TransactionTypeOption, Account, Category, VirtualFund } from '@/app/types';
 import { usePlanning } from '@/app/hooks/usePlanning';
 import { colors } from '@/app/styles/theme';
 import { CategoryPicker } from '@/app/components/common/CategoryPicker';
@@ -18,12 +18,14 @@ interface Props {
     transactionTypes: TransactionTypeOption[];
     accounts: Account[];
     categories: Category[];
+    virtualFunds?: VirtualFund[];
     data: {
         type: string;
         amount: number;
         account_id: number | undefined;
         destination_account_id?: number;
         category_id?: number;
+        virtual_fund_id?: number;
         description: string;
         date: string;
         time: string;
@@ -54,6 +56,7 @@ export function TransactionForm({
     transactionTypes,
     accounts,
     categories,
+    virtualFunds,
     data,
     errors,
     processing,
@@ -63,6 +66,49 @@ export function TransactionForm({
     const { planning } = usePlanning();
     const [showCategoryPicker, setShowCategoryPicker] = useState(false);
     const isTransfer = data.type === 'transfer';
+
+    // Find the selected account
+    const selectedAccount = useMemo(() => {
+        if (!data.account_id) return null;
+        return accounts.find(a => a.id === data.account_id) || null;
+    }, [accounts, data.account_id]);
+
+    // Find the selected fund
+    const selectedFund = useMemo(() => {
+        if (!data.virtual_fund_id || !virtualFunds) return null;
+        return virtualFunds.find(f => f.id === data.virtual_fund_id) || null;
+    }, [virtualFunds, data.virtual_fund_id]);
+
+    // Calculate available balance in the "Disponible" fund (account balance minus assigned funds)
+    const availableInDisponible = useMemo(() => {
+        if (!selectedAccount || !virtualFunds) return selectedAccount?.current_balance || 0;
+        const assignedToFunds = virtualFunds
+            .filter(f => !f.is_default && typeof f.id === 'number')
+            .reduce((sum, f) => sum + f.current_amount, 0);
+        return selectedAccount.current_balance - assignedToFunds;
+    }, [selectedAccount, virtualFunds]);
+
+    // Format currency helper
+    const formatCurrency = (amount: number) => {
+        return `$ ${Math.abs(amount).toLocaleString('es-CL')}`;
+    };
+
+    // Validation: check if amount exceeds available balance
+    const exceedsAccountBalance = useMemo(() => {
+        if (data.type === 'income') return false;
+        if (!selectedAccount) return false;
+        return data.amount > selectedAccount.current_balance;
+    }, [data.type, data.amount, selectedAccount]);
+
+    const exceedsFundBalance = useMemo(() => {
+        if (data.type === 'income') return false;
+        if (!data.virtual_fund_id) {
+            // Using "Disponible"
+            return data.amount > availableInDisponible;
+        }
+        if (!selectedFund) return false;
+        return data.amount > selectedFund.current_amount;
+    }, [data.type, data.amount, data.virtual_fund_id, selectedFund, availableInDisponible]);
 
     // Find the selected category
     const selectedCategory = useMemo(() => {
@@ -141,20 +187,35 @@ export function TransactionForm({
             {/* Account */}
             <Form.Item
                 label={isTransfer ? 'Cuenta origen' : 'Cuenta'}
-                validateStatus={errors.account_id ? 'error' : ''}
-                help={errors.account_id}
+                validateStatus={errors.account_id || exceedsAccountBalance ? 'error' : ''}
+                help={errors.account_id || (exceedsAccountBalance ? 'El monto excede el saldo disponible de la cuenta' : undefined)}
                 required
             >
                 <Select
                     size="large"
                     placeholder="Seleccionar cuenta"
                     value={data.account_id}
-                    onChange={(value) => setData('account_id', value)}
+                    onChange={(value) => {
+                        setData('account_id', value);
+                        // Clear fund selection when account changes
+                        setData('virtual_fund_id', undefined);
+                    }}
                     options={accounts.map((a) => ({
                         value: a.id,
                         label: a.name,
                     }))}
                 />
+                {selectedAccount && data.type !== 'income' && (
+                    <Typography.Text
+                        type="secondary"
+                        style={{ fontSize: 12, marginTop: 4, display: 'block' }}
+                    >
+                        Saldo disponible: <span style={{
+                            color: selectedAccount.current_balance >= 0 ? colors.income.main : colors.expense.main,
+                            fontWeight: 500
+                        }}>{formatCurrency(selectedAccount.current_balance)}</span>
+                    </Typography.Text>
+                )}
             </Form.Item>
 
             {/* Destination account (transfers only) */}
@@ -240,6 +301,51 @@ export function TransactionForm({
                 selectedId={data.category_id}
                 type={categoryType}
             />
+
+            {/* Virtual Fund selector (for income/expense/transfer when account has funds) */}
+            {virtualFunds && virtualFunds.filter(f => !f.is_default).length > 0 && (
+                <Form.Item
+                    label={isTransfer ? "Fondo de origen (opcional)" : "Fondo Virtual (opcional)"}
+                    validateStatus={errors.virtual_fund_id || (data.type !== 'income' && exceedsFundBalance) ? 'error' : ''}
+                    help={errors.virtual_fund_id || (data.type !== 'income' && exceedsFundBalance ? `El monto excede el saldo del fondo${data.virtual_fund_id ? '' : ' Disponible'}` : undefined)}
+                >
+                    <Select
+                        size="large"
+                        placeholder={isTransfer ? "Sale de Disponible" : "Sin asignar (va a Disponible)"}
+                        value={data.virtual_fund_id}
+                        onChange={(value) => setData('virtual_fund_id', value)}
+                        allowClear
+                        options={virtualFunds
+                            .filter(f => !f.is_default)
+                            .map((f) => ({
+                                value: f.id as number,
+                                label: `${f.name} (${formatCurrency(f.current_amount)})`,
+                            }))}
+                    />
+                    {data.type !== 'income' && selectedAccount && (
+                        <Typography.Text
+                            type="secondary"
+                            style={{ fontSize: 12, marginTop: 4, display: 'block' }}
+                        >
+                            {data.virtual_fund_id && selectedFund ? (
+                                <>
+                                    Saldo del fondo: <span style={{
+                                        color: selectedFund.current_amount >= 0 ? colors.income.main : colors.expense.main,
+                                        fontWeight: 500
+                                    }}>{formatCurrency(selectedFund.current_amount)}</span>
+                                </>
+                            ) : (
+                                <>
+                                    Saldo en Disponible: <span style={{
+                                        color: availableInDisponible >= 0 ? colors.income.main : colors.expense.main,
+                                        fontWeight: 500
+                                    }}>{formatCurrency(availableInDisponible)}</span>
+                                </>
+                            )}
+                        </Typography.Text>
+                    )}
+                </Form.Item>
+            )}
 
             {/* Date */}
             <Form.Item

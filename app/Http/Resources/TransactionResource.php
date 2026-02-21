@@ -32,6 +32,8 @@ class TransactionResource extends JsonResource
             'destination_account' => new AccountResource($this->whenLoaded('destinationAccount')),
             'category_id' => $this->category_id,
             'category' => new CategoryResource($this->whenLoaded('category')),
+            'virtual_fund_id' => $this->virtual_fund_id,
+            'virtual_fund' => new VirtualFundResource($this->whenLoaded('virtualFund')),
             'created_by' => $this->created_by,
             'creator' => new UserResource($this->whenLoaded('creator')),
 

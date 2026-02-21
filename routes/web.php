@@ -17,6 +17,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReceivableController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\VirtualFundController;
 use App\Http\Middleware\EnsureActivePlanning;
 use Illuminate\Support\Facades\Route;
 
@@ -91,6 +92,12 @@ Route::middleware('auth')->group(function () {
         Route::post('accounts/{account}/restore', [AccountController::class, 'restore'])->name('accounts.restore');
         Route::post('accounts/{account}/adjust-balance', [AccountController::class, 'adjustBalance'])->name('accounts.adjust-balance');
         Route::post('accounts/transfer', [AccountController::class, 'transfer'])->name('accounts.transfer');
+
+        // Virtual Funds
+        Route::post('accounts/{account}/funds', [VirtualFundController::class, 'store'])->name('funds.store');
+        Route::put('funds/{fund}', [VirtualFundController::class, 'update'])->name('funds.update');
+        Route::delete('funds/{fund}', [VirtualFundController::class, 'destroy'])->name('funds.destroy');
+        Route::post('funds/transfer', [VirtualFundController::class, 'transfer'])->name('funds.transfer');
 
         // Categories
         Route::resource('categories', CategoryController::class)->except(['show']);

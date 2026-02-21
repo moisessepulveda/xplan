@@ -6,7 +6,7 @@ import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
 import { AppLayout } from '@/app/components/common/AppLayout';
 import { TransactionForm } from '@/app/components/transactions';
-import { TransactionTypeOption, Account, Category, RecurringTransaction } from '@/app/types';
+import { TransactionTypeOption, Account, Category, RecurringTransaction, VirtualFund } from '@/app/types';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -15,11 +15,12 @@ interface Props {
     transactionTypes: TransactionTypeOption[];
     accounts: Account[];
     categories: Category[];
+    virtualFunds: VirtualFund[];
     fromRecurring?: RecurringTransaction;
     period?: string;
 }
 
-export default function CreateTransaction({ transactionTypes, accounts, categories, fromRecurring, period }: Props) {
+export default function CreateTransaction({ transactionTypes, accounts, categories, virtualFunds, fromRecurring, period }: Props) {
     // Read type from URL query params (from QuickActions)
     const { url } = usePage();
     const searchParams = new URLSearchParams(url.split('?')[1] || '');
@@ -35,6 +36,7 @@ export default function CreateTransaction({ transactionTypes, accounts, categori
         account_id: fromRecurring?.account_id || (accounts.length === 1 ? accounts[0].id : undefined) as number | undefined,
         destination_account_id: fromRecurring?.destination_account_id || undefined as number | undefined,
         category_id: fromRecurring?.category_id || undefined as number | undefined,
+        virtual_fund_id: undefined as number | undefined,
         description: fromRecurring?.description || '',
         date: defaultDate,
         time: '',
@@ -42,6 +44,9 @@ export default function CreateTransaction({ transactionTypes, accounts, categori
         is_recurring: false,
         from_recurring_id: fromRecurring?.id || undefined as number | undefined,
     });
+
+    // Filter virtual funds by selected account
+    const accountFunds = virtualFunds.filter(f => f.account_id === data.account_id);
 
     const handleSubmit = () => {
         post('/transactions');
@@ -63,6 +68,7 @@ export default function CreateTransaction({ transactionTypes, accounts, categori
                         transactionTypes={transactionTypes}
                         accounts={accounts}
                         categories={categories}
+                        virtualFunds={accountFunds}
                         data={data}
                         errors={errors}
                         processing={processing}

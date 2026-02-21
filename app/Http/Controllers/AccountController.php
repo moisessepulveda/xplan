@@ -13,6 +13,7 @@ use App\Http\Requests\Account\TransferRequest;
 use App\Http\Requests\Account\UpdateAccountRequest;
 use App\Http\Resources\AccountResource;
 use App\Http\Resources\TransactionResource;
+use App\Http\Resources\VirtualFundResource;
 use App\Models\Account;
 use App\Models\Transaction;
 use App\Services\BalanceCalculator;
@@ -55,8 +56,29 @@ class AccountController extends Controller
 
     public function show(Account $account, BalanceCalculator $calculator): Response
     {
+        // Load virtual funds
+        $funds = $account->virtualFunds()
+            ->nonDefault()
+            ->ordered()
+            ->get();
+
+        // Create "Disponible" virtual representation
+        $availableFund = [
+            'id' => 'available',
+            'account_id' => $account->id,
+            'name' => 'Disponible',
+            'current_amount' => $account->available_balance,
+            'goal_amount' => null,
+            'progress' => 0,
+            'icon' => 'wallet',
+            'color' => '#52c41a',
+            'description' => null,
+            'is_default' => true,
+            'order' => 0,
+        ];
+
         // Obtener transacciones de esta cuenta (como origen o destino)
-        $transactions = Transaction::with(['category', 'account', 'destinationAccount'])
+        $transactions = Transaction::with(['category', 'account', 'destinationAccount', 'virtualFund'])
             ->where(function ($query) use ($account) {
                 $query->where('account_id', $account->id)
                     ->orWhere('destination_account_id', $account->id);
@@ -68,6 +90,7 @@ class AccountController extends Controller
 
         return Inertia::render('Accounts/Show', [
             'account' => new AccountResource($account),
+            'virtualFunds' => array_merge([$availableFund], VirtualFundResource::collection($funds)->resolve()),
             'transactions' => TransactionResource::collection($transactions),
         ]);
     }

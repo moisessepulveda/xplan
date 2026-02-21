@@ -5,6 +5,7 @@ namespace App\Actions\Transaction;
 use App\Enums\TransactionType;
 use App\Models\Account;
 use App\Models\Transaction;
+use App\Models\VirtualFund;
 use Illuminate\Support\Facades\DB;
 
 class DeleteTransactionAction
@@ -15,6 +16,7 @@ class DeleteTransactionAction
             // Solo revertir saldos si la transacción NO estaba pendiente de aprobación
             if (!$transaction->pending_approval) {
                 $this->reverseBalanceImpact($transaction);
+                $this->reverseFundImpact($transaction);
             }
             $transaction->delete();
         });
@@ -39,5 +41,26 @@ class DeleteTransactionAction
             $destinationAccount = Account::findOrFail($transaction->destination_account_id);
             $destinationAccount->updateBalance(-$transaction->amount);
         }
+    }
+
+    private function reverseFundImpact(Transaction $transaction): void
+    {
+        if (!$transaction->virtual_fund_id) {
+            return;
+        }
+
+        $fund = VirtualFund::find($transaction->virtual_fund_id);
+        if (!$fund || $fund->is_default) {
+            return;
+        }
+
+        // Reverse the original impact: income added, expense/transfer subtracted
+        $reverseImpact = match ($transaction->type) {
+            TransactionType::INCOME => -(float) $transaction->amount,
+            TransactionType::EXPENSE => (float) $transaction->amount,
+            TransactionType::TRANSFER => (float) $transaction->amount, // Transfers subtracted, so reverse adds
+        };
+
+        $fund->updateAmount($reverseImpact);
     }
 }

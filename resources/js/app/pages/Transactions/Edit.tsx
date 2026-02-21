@@ -4,13 +4,14 @@ import { Card, Button, Popconfirm, Divider } from 'antd';
 import { DeleteOutlined, CopyOutlined } from '@ant-design/icons';
 import { AppLayout } from '@/app/components/common/AppLayout';
 import { TransactionForm } from '@/app/components/transactions';
-import { Transaction, TransactionTypeOption, Account, Category } from '@/app/types';
+import { Transaction, TransactionTypeOption, Account, Category, VirtualFund } from '@/app/types';
 
 interface Props {
     transaction: Transaction;
     transactionTypes: TransactionTypeOption[];
     accounts: Account[];
     categories: Category[];
+    virtualFunds: VirtualFund[];
 }
 
 export default function EditTransaction({
@@ -18,6 +19,7 @@ export default function EditTransaction({
     transactionTypes,
     accounts,
     categories,
+    virtualFunds,
 }: Props) {
     const { data, setData, put, processing, errors } = useForm({
         type: transaction.type,
@@ -25,11 +27,15 @@ export default function EditTransaction({
         account_id: transaction.account_id,
         destination_account_id: transaction.destination_account_id,
         category_id: transaction.category_id,
+        virtual_fund_id: transaction.virtual_fund_id,
         description: transaction.description || '',
         date: transaction.date,
         time: transaction.time || '',
         tags: transaction.tags || [],
     });
+
+    // Filter virtual funds by selected account
+    const accountFunds = virtualFunds.filter(f => f.account_id === data.account_id);
 
     const handleSubmit = () => {
         put(`/transactions/${transaction.id}`);
@@ -54,6 +60,7 @@ export default function EditTransaction({
                         transactionTypes={transactionTypes}
                         accounts={accounts}
                         categories={categories}
+                        virtualFunds={accountFunds}
                         data={data}
                         errors={errors}
                         processing={processing}

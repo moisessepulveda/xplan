@@ -16,6 +16,8 @@ use App\Http\Resources\TransactionResource;
 use App\Http\Resources\RecurringTransactionResource;
 use App\Http\Resources\AccountResource;
 use App\Http\Resources\CategoryResource;
+use App\Http\Resources\VirtualFundResource;
+use App\Models\VirtualFund;
 use App\Models\Account;
 use App\Models\Category;
 use App\Models\CreditInstallment;
@@ -144,12 +146,18 @@ class TransactionController extends Controller
             }
         }
 
+        // Load virtual funds for all active accounts
+        $virtualFunds = VirtualFund::whereHas('account', function ($q) {
+            $q->active();
+        })->nonDefault()->ordered()->get();
+
         return Inertia::render('Transactions/Create', [
             'transactionTypes' => TransactionType::options(),
             'accounts' => AccountResource::collection(Account::active()->ordered()->get()),
             'categories' => CategoryResource::collection(
                 Category::active()->roots()->with('children')->ordered()->get()
             ),
+            'virtualFunds' => VirtualFundResource::collection($virtualFunds),
             'fromRecurring' => $fromRecurring,
             'period' => $period,
         ]);
@@ -212,7 +220,12 @@ class TransactionController extends Controller
 
     public function edit(Transaction $transaction): Response
     {
-        $transaction->load(['account', 'destinationAccount', 'category']);
+        $transaction->load(['account', 'destinationAccount', 'category', 'virtualFund']);
+
+        // Load virtual funds for all active accounts
+        $virtualFunds = VirtualFund::whereHas('account', function ($q) {
+            $q->active();
+        })->nonDefault()->ordered()->get();
 
         return Inertia::render('Transactions/Edit', [
             'transaction' => new TransactionResource($transaction),
@@ -221,6 +234,7 @@ class TransactionController extends Controller
             'categories' => CategoryResource::collection(
                 Category::active()->roots()->with('children')->ordered()->get()
             ),
+            'virtualFunds' => VirtualFundResource::collection($virtualFunds),
         ]);
     }
 

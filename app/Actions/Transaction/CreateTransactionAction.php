@@ -5,6 +5,7 @@ namespace App\Actions\Transaction;
 use App\Enums\TransactionType;
 use App\Models\Account;
 use App\Models\Transaction;
+use App\Models\VirtualFund;
 use Illuminate\Support\Facades\DB;
 
 class CreateTransactionAction
@@ -19,6 +20,7 @@ class CreateTransactionAction
                 'account_id' => $data['account_id'],
                 'destination_account_id' => $data['destination_account_id'] ?? null,
                 'category_id' => $data['category_id'] ?? null,
+                'virtual_fund_id' => $data['virtual_fund_id'] ?? null,
                 'created_by' => $data['created_by'] ?? auth()->id(),
                 'type' => $data['type'],
                 'amount' => $data['amount'],
@@ -36,6 +38,7 @@ class CreateTransactionAction
             // Solo actualizar saldos si la transacción NO está pendiente de aprobación
             if (!$pendingApproval) {
                 $this->updateAccountBalances($transaction);
+                $this->updateFundBalance($transaction);
             }
 
             return $transaction;
@@ -61,5 +64,26 @@ class CreateTransactionAction
             $destinationAccount = Account::findOrFail($transaction->destination_account_id);
             $destinationAccount->updateBalance($transaction->amount);
         }
+    }
+
+    private function updateFundBalance(Transaction $transaction): void
+    {
+        if (!$transaction->virtual_fund_id) {
+            return;
+        }
+
+        $fund = VirtualFund::find($transaction->virtual_fund_id);
+        if (!$fund || $fund->is_default) {
+            return;
+        }
+
+        // For transfers, the money leaves the source fund (negative impact)
+        $impact = match ($transaction->type) {
+            TransactionType::INCOME => (float) $transaction->amount,
+            TransactionType::EXPENSE => -(float) $transaction->amount,
+            TransactionType::TRANSFER => -(float) $transaction->amount, // Sale del fondo
+        };
+
+        $fund->updateAmount($impact);
     }
 }

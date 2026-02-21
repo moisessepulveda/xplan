@@ -131,6 +131,31 @@ export interface AccountsSummary {
   count: number;
 }
 
+export interface VirtualFund {
+  id: number | 'available';
+  account_id?: number;
+  name: string;
+  current_amount: number;
+  goal_amount: number | null;
+  progress: number;
+  icon?: string;
+  color?: string;
+  description?: string;
+  is_default: boolean;
+  order: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface VirtualFundTransfer {
+  id: number;
+  from_fund_id: number;
+  to_fund_id: number;
+  amount: number;
+  description?: string;
+  created_at: string;
+}
+
 export interface Category {
   id: number;
   planning_id?: number;
@@ -171,6 +196,7 @@ export interface Transaction {
   account_id: number;
   destination_account_id?: number;
   category_id?: number;
+  virtual_fund_id?: number;
   description?: string;
   date: string;
   time?: string;
@@ -185,6 +211,7 @@ export interface Transaction {
   account?: Account;
   destination_account?: Account;
   category?: Category;
+  virtual_fund?: VirtualFund;
   creator?: User;
 }
 

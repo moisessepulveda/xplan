@@ -9,6 +9,7 @@ use App\Traits\Orderable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Account extends Model
@@ -73,5 +74,24 @@ class Account extends Model
     public function updateBalance(float $delta): void
     {
         $this->increment('current_balance', $delta);
+    }
+
+    public function virtualFunds(): HasMany
+    {
+        return $this->hasMany(VirtualFund::class);
+    }
+
+    public function defaultFund(): HasOne
+    {
+        return $this->hasOne(VirtualFund::class)->where('is_default', true);
+    }
+
+    public function getAvailableBalanceAttribute(): float
+    {
+        $assignedAmount = $this->virtualFunds()
+            ->where('is_default', false)
+            ->sum('current_amount');
+
+        return (float) $this->current_balance - (float) $assignedAmount;
     }
 }

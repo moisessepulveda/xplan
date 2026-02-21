@@ -19,6 +19,7 @@ class Transaction extends Model
         'account_id',
         'destination_account_id',
         'category_id',
+        'virtual_fund_id',
         'created_by',
         'type',
         'amount',
@@ -61,6 +62,11 @@ class Transaction extends Model
     public function recurringTransaction(): BelongsTo
     {
         return $this->belongsTo(RecurringTransaction::class);
+    }
+
+    public function virtualFund(): BelongsTo
+    {
+        return $this->belongsTo(VirtualFund::class);
     }
 
     public function scopeOfType($query, TransactionType $type)
