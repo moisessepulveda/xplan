@@ -1,16 +1,19 @@
-import React, { useState, useMemo } from 'react';
-import { Form, Input, InputNumber, Select, DatePicker, Button, Segmented, Switch, Typography } from 'antd';
+import React, { useState, useMemo, useRef } from 'react';
+import { Form, Input, InputNumber, Select, DatePicker, Button, Segmented, Switch, Typography, Upload, message, Spin } from 'antd';
 import {
     ArrowUpOutlined,
     ArrowDownOutlined,
     SwapOutlined,
     RightOutlined,
+    CameraOutlined,
+    DeleteOutlined,
 } from '@ant-design/icons';
 import { Transaction, TransactionTypeOption, Account, Category, VirtualFund } from '@/app/types';
 import { colors } from '@/app/styles/theme';
 import { CategoryPicker } from '@/app/components/common/CategoryPicker';
 import { getIcon } from '@/app/utils/icons';
 import dayjs from 'dayjs';
+import axios from 'axios';
 
 interface Props {
     transaction?: Transaction;
@@ -66,7 +69,82 @@ export function TransactionForm({
     onSubmit,
 }: Props) {
     const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+    const [analyzingReceipt, setAnalyzingReceipt] = useState(false);
+    const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const isTransfer = data.type === 'transfer';
+    const isExpense = data.type === 'expense';
+
+    // Handle receipt photo upload and analysis
+    const handleReceiptUpload = async (file: File) => {
+        if (!file) return;
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            setReceiptPreview(e.target?.result as string);
+        };
+        reader.readAsDataURL(file);
+
+        // Send to backend for analysis
+        setAnalyzingReceipt(true);
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const response = await axios.post('/transactions/analyze-receipt', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.data.success && response.data.data.is_valid_receipt) {
+                const receiptData = response.data.data;
+
+                // Auto-fill form with analyzed data
+                if (receiptData.amount > 0) {
+                    setData('amount', receiptData.amount);
+                }
+                if (receiptData.description || receiptData.merchant) {
+                    setData('description', receiptData.merchant || receiptData.description);
+                }
+                if (receiptData.date) {
+                    setData('date', receiptData.date);
+                }
+                if (receiptData.suggested_category_id > 0) {
+                    setData('category_id', receiptData.suggested_category_id);
+                }
+
+                message.success(`Recibo analizado (confianza: ${Math.round(receiptData.confidence * 100)}%)`);
+            } else if (response.data.success && !response.data.data.is_valid_receipt) {
+                message.warning('La imagen no parece ser un recibo o comprobante de pago.');
+            } else {
+                message.error(response.data.error || 'Error al analizar la imagen.');
+            }
+        } catch (error: unknown) {
+            console.error('Error analyzing receipt:', error);
+            const errorMessage = axios.isAxiosError(error)
+                ? error.response?.data?.error || 'Error al analizar la imagen.'
+                : 'Error al analizar la imagen.';
+            message.error(errorMessage);
+        } finally {
+            setAnalyzingReceipt(false);
+        }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            handleReceiptUpload(file);
+        }
+    };
+
+    const clearReceipt = () => {
+        setReceiptPreview(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
 
     // Find the selected account
     const selectedAccount = useMemo(() => {
@@ -159,6 +237,88 @@ export function TransactionForm({
                             ),
                         }))}
                     />
+                </Form.Item>
+            )}
+
+            {/* Receipt Photo Upload (only for expenses) */}
+            {isExpense && !transaction && (
+                <Form.Item>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        capture="environment"
+                        onChange={handleFileChange}
+                        style={{ display: 'none' }}
+                    />
+                    {receiptPreview ? (
+                        <div style={{
+                            position: 'relative',
+                            borderRadius: 8,
+                            overflow: 'hidden',
+                            border: '1px solid var(--ant-color-border)',
+                        }}>
+                            <img
+                                src={receiptPreview}
+                                alt="Recibo"
+                                style={{
+                                    width: '100%',
+                                    maxHeight: 200,
+                                    objectFit: 'cover',
+                                }}
+                            />
+                            {analyzingReceipt && (
+                                <div style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    backgroundColor: 'rgba(0,0,0,0.5)',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexDirection: 'column',
+                                    gap: 8,
+                                }}>
+                                    <Spin size="large" />
+                                    <Typography.Text style={{ color: '#fff' }}>
+                                        Analizando recibo...
+                                    </Typography.Text>
+                                </div>
+                            )}
+                            {!analyzingReceipt && (
+                                <Button
+                                    type="text"
+                                    danger
+                                    icon={<DeleteOutlined />}
+                                    onClick={clearReceipt}
+                                    style={{
+                                        position: 'absolute',
+                                        top: 8,
+                                        right: 8,
+                                        backgroundColor: 'rgba(255,255,255,0.9)',
+                                    }}
+                                />
+                            )}
+                        </div>
+                    ) : (
+                        <Button
+                            block
+                            size="large"
+                            icon={<CameraOutlined />}
+                            onClick={() => fileInputRef.current?.click()}
+                            style={{
+                                height: 56,
+                                borderStyle: 'dashed',
+                            }}
+                        >
+                            Escanear recibo o boleta
+                        </Button>
+                    )}
+                    <Typography.Text type="secondary" style={{ fontSize: 12, marginTop: 4, display: 'block' }}>
+                        Sube una foto del recibo para autocompletar el formulario
+                    </Typography.Text>
                 </Form.Item>
             )}
 

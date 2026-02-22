@@ -15,6 +15,7 @@ use App\Http\Controllers\InvitationController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReceivableController;
+use App\Http\Controllers\ReceiptAnalysisController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\VirtualFundController;
@@ -110,6 +111,7 @@ Route::middleware('auth')->group(function () {
         Route::post('transactions/{transaction}/duplicate', [TransactionController::class, 'duplicate'])->name('transactions.duplicate');
         Route::post('transactions/{transaction}/approve', [TransactionController::class, 'approve'])->name('transactions.approve');
         Route::post('transactions/{transaction}/reject', [TransactionController::class, 'reject'])->name('transactions.reject');
+        Route::post('transactions/analyze-receipt', [ReceiptAnalysisController::class, 'analyze'])->name('transactions.analyze-receipt');
         Route::get('transactions-recurring', [TransactionController::class, 'recurring'])->name('transactions.recurring');
         Route::post('recurring/{recurring}/apply', [TransactionController::class, 'applyRecurring'])->name('recurring.apply');
         Route::post('recurring/{recurring}/skip', [TransactionController::class, 'skipRecurring'])->name('recurring.skip');

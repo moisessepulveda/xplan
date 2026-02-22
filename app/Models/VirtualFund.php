@@ -23,6 +23,7 @@ class VirtualFund extends Model
         'description',
         'is_default',
         'order',
+        'virtual_fund_id',
     ];
 
     protected $casts = [
