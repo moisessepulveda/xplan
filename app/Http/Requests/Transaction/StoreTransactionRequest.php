@@ -22,6 +22,7 @@ class StoreTransactionRequest extends FormRequest
             'destination_account_id' => ['nullable', 'integer', 'exists:accounts,id', 'different:account_id'],
             'category_id' => ['nullable', 'integer', 'exists:categories,id'],
             'virtual_fund_id' => ['nullable', 'integer', 'exists:virtual_funds,id'],
+            'destination_virtual_fund_id' => ['nullable', 'integer', 'exists:virtual_funds,id'],
             'description' => ['nullable', 'string', 'max:500'],
             'date' => ['required', 'date'],
             'time' => ['nullable', 'date_format:H:i'],

@@ -21,6 +21,7 @@ class CreateTransactionAction
                 'destination_account_id' => $data['destination_account_id'] ?? null,
                 'category_id' => $data['category_id'] ?? null,
                 'virtual_fund_id' => $data['virtual_fund_id'] ?? null,
+                'destination_virtual_fund_id' => $data['destination_virtual_fund_id'] ?? null,
                 'created_by' => $data['created_by'] ?? auth()->id(),
                 'type' => $data['type'],
                 'amount' => $data['amount'],
@@ -68,22 +69,27 @@ class CreateTransactionAction
 
     private function updateFundBalance(Transaction $transaction): void
     {
-        if (!$transaction->virtual_fund_id) {
-            return;
+        // Update source fund balance
+        if ($transaction->virtual_fund_id) {
+            $fund = VirtualFund::find($transaction->virtual_fund_id);
+            if ($fund && !$fund->is_default) {
+                // For transfers, the money leaves the source fund (negative impact)
+                $impact = match ($transaction->type) {
+                    TransactionType::INCOME => (float) $transaction->amount,
+                    TransactionType::EXPENSE => -(float) $transaction->amount,
+                    TransactionType::TRANSFER => -(float) $transaction->amount, // Sale del fondo
+                };
+
+                $fund->updateAmount($impact);
+            }
         }
 
-        $fund = VirtualFund::find($transaction->virtual_fund_id);
-        if (!$fund || $fund->is_default) {
-            return;
+        // Update destination fund balance (only for transfers)
+        if ($transaction->type === TransactionType::TRANSFER && $transaction->destination_virtual_fund_id) {
+            $destinationFund = VirtualFund::find($transaction->destination_virtual_fund_id);
+            if ($destinationFund && !$destinationFund->is_default) {
+                $destinationFund->updateAmount((float) $transaction->amount);
+            }
         }
-
-        // For transfers, the money leaves the source fund (negative impact)
-        $impact = match ($transaction->type) {
-            TransactionType::INCOME => (float) $transaction->amount,
-            TransactionType::EXPENSE => -(float) $transaction->amount,
-            TransactionType::TRANSFER => -(float) $transaction->amount, // Sale del fondo
-        };
-
-        $fund->updateAmount($impact);
     }
 }

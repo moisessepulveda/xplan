@@ -496,6 +496,7 @@ export default function ShowAccount({ account, virtualFunds, transactions }: Pro
                 loading={transferring}
                 funds={virtualFunds}
                 currency={account.currency}
+                accountId={account.id}
             />
         </AppLayout>
     );

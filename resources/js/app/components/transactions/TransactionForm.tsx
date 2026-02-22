@@ -19,6 +19,7 @@ interface Props {
     accounts: Account[];
     categories: Category[];
     virtualFunds?: VirtualFund[];
+    destinationVirtualFunds?: VirtualFund[];
     data: {
         type: string;
         amount: number;
@@ -26,6 +27,7 @@ interface Props {
         destination_account_id?: number;
         category_id?: number;
         virtual_fund_id?: number;
+        destination_virtual_fund_id?: number;
         description: string;
         date: string;
         time: string;
@@ -57,6 +59,7 @@ export function TransactionForm({
     accounts,
     categories,
     virtualFunds,
+    destinationVirtualFunds,
     data,
     errors,
     processing,
@@ -230,12 +233,39 @@ export function TransactionForm({
                         size="large"
                         placeholder="Seleccionar cuenta destino"
                         value={data.destination_account_id}
-                        onChange={(value) => setData('destination_account_id', value)}
+                        onChange={(value) => {
+                            setData('destination_account_id', value);
+                            // Clear destination fund selection when account changes
+                            setData('destination_virtual_fund_id', undefined);
+                        }}
                         options={accounts
                             .filter((a) => a.id !== data.account_id)
                             .map((a) => ({
                                 value: a.id,
                                 label: a.name,
+                            }))}
+                    />
+                </Form.Item>
+            )}
+
+            {/* Destination Virtual Fund selector (for transfers when destination account has funds) */}
+            {isTransfer && destinationVirtualFunds && destinationVirtualFunds.filter(f => !f.is_default).length > 0 && (
+                <Form.Item
+                    label="Fondo destino (opcional)"
+                    validateStatus={errors.destination_virtual_fund_id ? 'error' : ''}
+                    help={errors.destination_virtual_fund_id}
+                >
+                    <Select
+                        size="large"
+                        placeholder="Entra a Disponible"
+                        value={data.destination_virtual_fund_id}
+                        onChange={(value) => setData('destination_virtual_fund_id', value)}
+                        allowClear
+                        options={destinationVirtualFunds
+                            .filter(f => !f.is_default)
+                            .map((f) => ({
+                                value: f.id as number,
+                                label: `${f.name} (${formatCurrency(f.current_amount)})`,
                             }))}
                     />
                 </Form.Item>

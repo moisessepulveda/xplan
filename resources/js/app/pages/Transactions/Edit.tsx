@@ -28,14 +28,18 @@ export default function EditTransaction({
         destination_account_id: transaction.destination_account_id,
         category_id: transaction.category_id,
         virtual_fund_id: transaction.virtual_fund_id,
+        destination_virtual_fund_id: transaction.destination_virtual_fund_id,
         description: transaction.description || '',
         date: transaction.date,
         time: transaction.time || '',
         tags: transaction.tags || [],
     });
 
-    // Filter virtual funds by selected account
+    // Filter virtual funds by selected account (source)
     const accountFunds = virtualFunds.filter(f => f.account_id === data.account_id);
+
+    // Filter virtual funds by destination account
+    const destinationAccountFunds = virtualFunds.filter(f => f.account_id === data.destination_account_id);
 
     const handleSubmit = () => {
         put(`/transactions/${transaction.id}`);
@@ -61,6 +65,7 @@ export default function EditTransaction({
                         accounts={accounts}
                         categories={categories}
                         virtualFunds={accountFunds}
+                        destinationVirtualFunds={destinationAccountFunds}
                         data={data}
                         errors={errors}
                         processing={processing}

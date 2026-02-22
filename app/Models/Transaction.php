@@ -20,6 +20,7 @@ class Transaction extends Model
         'destination_account_id',
         'category_id',
         'virtual_fund_id',
+        'destination_virtual_fund_id',
         'created_by',
         'type',
         'amount',
@@ -67,6 +68,11 @@ class Transaction extends Model
     public function virtualFund(): BelongsTo
     {
         return $this->belongsTo(VirtualFund::class);
+    }
+
+    public function destinationVirtualFund(): BelongsTo
+    {
+        return $this->belongsTo(VirtualFund::class, 'destination_virtual_fund_id');
     }
 
     public function scopeOfType($query, TransactionType $type)

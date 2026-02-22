@@ -15,6 +15,7 @@ class UpdateTransactionAction
         return DB::transaction(function () use ($transaction, $data) {
             $isPending = $transaction->pending_approval;
             $oldFundId = $transaction->virtual_fund_id;
+            $oldDestinationFundId = $transaction->destination_virtual_fund_id;
             $oldType = $transaction->type;
             $oldAmount = $transaction->amount;
 
@@ -22,6 +23,7 @@ class UpdateTransactionAction
             if (!$isPending) {
                 $this->reverseBalanceImpact($transaction);
                 $this->reverseFundImpact($oldFundId, $oldType, $oldAmount);
+                $this->reverseDestinationFundImpact($oldDestinationFundId, $oldType, $oldAmount);
             }
 
             $transaction->update([
@@ -29,6 +31,7 @@ class UpdateTransactionAction
                 'destination_account_id' => $data['destination_account_id'] ?? $transaction->destination_account_id,
                 'category_id' => $data['category_id'] ?? $transaction->category_id,
                 'virtual_fund_id' => array_key_exists('virtual_fund_id', $data) ? $data['virtual_fund_id'] : $transaction->virtual_fund_id,
+                'destination_virtual_fund_id' => array_key_exists('destination_virtual_fund_id', $data) ? $data['destination_virtual_fund_id'] : $transaction->destination_virtual_fund_id,
                 'type' => $data['type'] ?? $transaction->type,
                 'amount' => $data['amount'] ?? $transaction->amount,
                 'description' => $data['description'] ?? $transaction->description,
@@ -44,6 +47,7 @@ class UpdateTransactionAction
             if (!$isPending) {
                 $this->applyBalanceImpact($transaction);
                 $this->applyFundImpact($transaction);
+                $this->applyDestinationFundImpact($transaction);
             }
 
             return $transaction->fresh();
@@ -132,5 +136,37 @@ class UpdateTransactionAction
         };
 
         $fund->updateAmount($impact);
+    }
+
+    private function reverseDestinationFundImpact(?int $fundId, TransactionType $type, float $amount): void
+    {
+        // Only transfers can have destination fund
+        if ($type !== TransactionType::TRANSFER || !$fundId) {
+            return;
+        }
+
+        $fund = VirtualFund::find($fundId);
+        if (!$fund || $fund->is_default) {
+            return;
+        }
+
+        // Reverse: money entered the destination fund, so we subtract it
+        $fund->updateAmount(-(float) $amount);
+    }
+
+    private function applyDestinationFundImpact(Transaction $transaction): void
+    {
+        // Only transfers can have destination fund
+        if ($transaction->type !== TransactionType::TRANSFER || !$transaction->destination_virtual_fund_id) {
+            return;
+        }
+
+        $fund = VirtualFund::find($transaction->destination_virtual_fund_id);
+        if (!$fund || $fund->is_default) {
+            return;
+        }
+
+        // Apply: money enters the destination fund
+        $fund->updateAmount((float) $transaction->amount);
     }
 }

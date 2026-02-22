@@ -11,9 +11,11 @@ interface Props {
     loading?: boolean;
     funds: VirtualFund[];
     currency: string;
+    accountId: number;
 }
 
 export interface TransferData {
+    account_id: number;
     from_fund_id: number | 'available';
     to_fund_id: number | 'available';
     amount: number;
@@ -27,6 +29,7 @@ export function TransferBetweenFundsModal({
     loading,
     funds,
     currency,
+    accountId,
 }: Props) {
     const { planning } = usePlanning();
     const [form] = Form.useForm();
@@ -54,7 +57,10 @@ export function TransferBetweenFundsModal({
 
     const handleSubmit = () => {
         form.validateFields().then(values => {
-            onSubmit(values);
+            onSubmit({
+                ...values,
+                account_id: accountId,
+            });
         });
     };
 

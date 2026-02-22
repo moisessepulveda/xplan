@@ -199,6 +199,7 @@ export interface Transaction {
   destination_account_id?: number;
   category_id?: number;
   virtual_fund_id?: number;
+  destination_virtual_fund_id?: number;
   description?: string;
   date: string;
   time?: string;
@@ -214,6 +215,7 @@ export interface Transaction {
   destination_account?: Account;
   category?: Category;
   virtual_fund?: VirtualFund;
+  destination_virtual_fund?: VirtualFund;
   creator?: User;
 }
 

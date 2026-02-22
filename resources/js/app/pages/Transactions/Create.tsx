@@ -37,6 +37,7 @@ export default function CreateTransaction({ transactionTypes, accounts, categori
         destination_account_id: fromRecurring?.destination_account_id || undefined as number | undefined,
         category_id: fromRecurring?.category_id || undefined as number | undefined,
         virtual_fund_id: undefined as number | undefined,
+        destination_virtual_fund_id: undefined as number | undefined,
         description: fromRecurring?.description || '',
         date: defaultDate,
         time: '',
@@ -45,8 +46,11 @@ export default function CreateTransaction({ transactionTypes, accounts, categori
         from_recurring_id: fromRecurring?.id || undefined as number | undefined,
     });
 
-    // Filter virtual funds by selected account
+    // Filter virtual funds by selected account (source)
     const accountFunds = virtualFunds.filter(f => f.account_id === data.account_id);
+
+    // Filter virtual funds by destination account
+    const destinationAccountFunds = virtualFunds.filter(f => f.account_id === data.destination_account_id);
 
     const handleSubmit = () => {
         post('/transactions');
@@ -69,6 +73,7 @@ export default function CreateTransaction({ transactionTypes, accounts, categori
                         accounts={accounts}
                         categories={categories}
                         virtualFunds={accountFunds}
+                        destinationVirtualFunds={destinationAccountFunds}
                         data={data}
                         errors={errors}
                         processing={processing}

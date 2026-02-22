@@ -56,26 +56,46 @@ class AccountController extends Controller
 
     public function show(Account $account, BalanceCalculator $calculator): Response
     {
-        // Load virtual funds
+        // Load virtual funds (non-default)
         $funds = $account->virtualFunds()
             ->nonDefault()
             ->ordered()
             ->get();
 
-        // Create "Disponible" virtual representation
-        $availableFund = [
-            'id' => 'available',
-            'account_id' => $account->id,
-            'name' => 'Disponible',
-            'current_amount' => $account->available_balance,
-            'goal_amount' => null,
-            'progress' => 0,
-            'icon' => 'wallet',
-            'color' => '#52c41a',
-            'description' => null,
-            'is_default' => true,
-            'order' => 0,
-        ];
+        // Get or create "Disponible" fund representation
+        // If a real default fund exists in DB, use it with updated balance
+        // Otherwise create a virtual representation with 'available' as id
+        $defaultFund = $account->defaultFund;
+
+        if ($defaultFund) {
+            $availableFund = [
+                'id' => $defaultFund->id,
+                'account_id' => $account->id,
+                'name' => 'Disponible',
+                'current_amount' => $account->available_balance,
+                'goal_amount' => null,
+                'progress' => 0,
+                'icon' => 'wallet',
+                'color' => '#52c41a',
+                'description' => null,
+                'is_default' => true,
+                'order' => 0,
+            ];
+        } else {
+            $availableFund = [
+                'id' => 'available',
+                'account_id' => $account->id,
+                'name' => 'Disponible',
+                'current_amount' => $account->available_balance,
+                'goal_amount' => null,
+                'progress' => 0,
+                'icon' => 'wallet',
+                'color' => '#52c41a',
+                'description' => null,
+                'is_default' => true,
+                'order' => 0,
+            ];
+        }
 
         // Obtener transacciones de esta cuenta (como origen o destino)
         $transactions = Transaction::with(['category', 'account', 'destinationAccount', 'virtualFund'])
