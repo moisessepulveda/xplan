@@ -168,9 +168,9 @@ a:active,
 
 /* Improve touch targets on touch devices */
 @media (pointer: coarse) {
-  button,
+  button:not(.ant-switch):not(.ant-switch-inner),
   a,
-  [role="button"],
+  [role="button"]:not([role="switch"]),
   .ant-btn {
     min-height: 44px;
     min-width: 44px;
