@@ -20,6 +20,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\VirtualFundController;
 use App\Http\Middleware\EnsureActivePlanning;
+use App\Http\Middleware\EnsureRegistrationEnabled;
 use Illuminate\Support\Facades\Route;
 
 // Offline fallback page (PWA)
@@ -41,8 +42,11 @@ Route::middleware('guest')->group(function () {
     Route::get('login', [LoginController::class, 'create'])->name('login');
     Route::post('login', [LoginController::class, 'store']);
 
-    Route::get('register', [RegisterController::class, 'create'])->name('register');
-    Route::post('register', [RegisterController::class, 'store']);
+    // Registration routes (with registration enabled check)
+    Route::middleware(EnsureRegistrationEnabled::class)->group(function () {
+        Route::get('register', [RegisterController::class, 'create'])->name('register');
+        Route::post('register', [RegisterController::class, 'store']);
+    });
 });
 
 /*

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\MemberRole;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -11,7 +13,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -25,6 +27,8 @@ class User extends Authenticatable
         'avatar',
         'settings',
         'active_planning_id',
+        'is_superadmin',
+        'is_active',
     ];
 
     /**
@@ -44,6 +48,8 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'settings' => 'array',
+            'is_superadmin' => 'boolean',
+            'is_active' => 'boolean',
         ];
     }
 
@@ -131,5 +137,21 @@ class User extends Authenticatable
             ->first();
 
         return $membership?->role;
+    }
+
+    /**
+     * Check if user is a superadmin.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->is_superadmin === true;
+    }
+
+    /**
+     * Check if user can access Filament admin panel.
+     */
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return $this->isSuperAdmin() && $this->is_active;
     }
 }

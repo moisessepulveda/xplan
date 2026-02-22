@@ -392,4 +392,112 @@ class DefaultCategoriesService
             ],
         ];
     }
+
+    /**
+     * Get all default category names (parents only).
+     */
+    public function getAllParentCategoryNames(): array
+    {
+        $names = [];
+
+        foreach ($this->getIncomeCategories() as $category) {
+            $names[] = $category['name'];
+        }
+
+        foreach ($this->getExpenseCategories() as $category) {
+            $names[] = $category['name'];
+        }
+
+        return $names;
+    }
+
+    /**
+     * Create only missing categories for a planning.
+     */
+    public function createMissingCategories(Planning $planning, int $userId): int
+    {
+        $existingParentNames = $planning->categories()
+            ->whereNull('parent_id')
+            ->pluck('name')
+            ->toArray();
+
+        $added = 0;
+
+        DB::transaction(function () use ($planning, $userId, $existingParentNames, &$added) {
+            $order = $planning->categories()->max('order') ?? 0;
+
+            // Process income categories
+            foreach ($this->getIncomeCategories() as $category) {
+                if (! in_array($category['name'], $existingParentNames)) {
+                    $parent = Category::create([
+                        'planning_id' => $planning->id,
+                        'created_by' => $userId,
+                        'name' => $category['name'],
+                        'type' => 'income',
+                        'icon' => $category['icon'],
+                        'color' => $category['color'],
+                        'is_system' => true,
+                        'order' => ++$order,
+                    ]);
+                    $added++;
+
+                    if (! empty($category['children'])) {
+                        $childOrder = 0;
+                        foreach ($category['children'] as $child) {
+                            Category::create([
+                                'planning_id' => $planning->id,
+                                'created_by' => $userId,
+                                'parent_id' => $parent->id,
+                                'name' => $child['name'],
+                                'type' => 'income',
+                                'icon' => $child['icon'],
+                                'color' => $child['color'],
+                                'is_system' => true,
+                                'order' => $childOrder++,
+                            ]);
+                            $added++;
+                        }
+                    }
+                }
+            }
+
+            // Process expense categories
+            foreach ($this->getExpenseCategories() as $category) {
+                if (! in_array($category['name'], $existingParentNames)) {
+                    $parent = Category::create([
+                        'planning_id' => $planning->id,
+                        'created_by' => $userId,
+                        'name' => $category['name'],
+                        'type' => 'expense',
+                        'icon' => $category['icon'],
+                        'color' => $category['color'],
+                        'is_system' => true,
+                        'system_type' => $category['system_type'] ?? null,
+                        'order' => ++$order,
+                    ]);
+                    $added++;
+
+                    if (! empty($category['children'])) {
+                        $childOrder = 0;
+                        foreach ($category['children'] as $child) {
+                            Category::create([
+                                'planning_id' => $planning->id,
+                                'created_by' => $userId,
+                                'parent_id' => $parent->id,
+                                'name' => $child['name'],
+                                'type' => 'expense',
+                                'icon' => $child['icon'],
+                                'color' => $child['color'],
+                                'is_system' => true,
+                                'order' => $childOrder++,
+                            ]);
+                            $added++;
+                        }
+                    }
+                }
+            }
+        });
+
+        return $added;
+    }
 }
