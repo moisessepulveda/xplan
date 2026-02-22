@@ -7,7 +7,6 @@ import {
     RightOutlined,
 } from '@ant-design/icons';
 import { Transaction, TransactionTypeOption, Account, Category, VirtualFund } from '@/app/types';
-import { usePlanning } from '@/app/hooks/usePlanning';
 import { colors } from '@/app/styles/theme';
 import { CategoryPicker } from '@/app/components/common/CategoryPicker';
 import { getIcon } from '@/app/utils/icons';
@@ -66,7 +65,6 @@ export function TransactionForm({
     setData,
     onSubmit,
 }: Props) {
-    const { planning } = usePlanning();
     const [showCategoryPicker, setShowCategoryPicker] = useState(false);
     const isTransfer = data.type === 'transfer';
 
