@@ -27,7 +27,7 @@ class ReceivableController extends Controller
         $type = $request->get('type', 'all');
         $status = $request->get('status');
 
-        $query = Receivable::with(['payments'])
+        $query = Receivable::with(['payments', 'creator'])
             ->when($type !== 'all', fn($q) => $q->where('type', $type))
             ->when($status, fn($q) => $q->where('status', $status))
             ->orderByRaw("CASE WHEN status IN ('pending', 'partial') THEN 0 ELSE 1 END")
@@ -84,7 +84,7 @@ class ReceivableController extends Controller
 
     public function show(Receivable $receivable): Response
     {
-        $receivable->load(['payments.account', 'reminders']);
+        $receivable->load(['payments.account', 'reminders', 'creator']);
 
         return Inertia::render('Receivables/Show', [
             'receivable' => new ReceivableResource($receivable),

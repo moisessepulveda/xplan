@@ -9,6 +9,7 @@ import {
     EllipsisOutlined,
 } from '@ant-design/icons';
 import { ProgressBar } from '@/app/components/budgets/ProgressBar';
+import { usePlanning } from '@/app/hooks/usePlanning';
 import type { Credit } from '@/app/types';
 
 interface CreditCardProps {
@@ -27,6 +28,9 @@ const typeIcons: Record<string, React.ReactNode> = {
 };
 
 export function CreditCard({ credit, formatCurrency, onClick }: CreditCardProps) {
+    const { planning } = usePlanning();
+    const showCreator = (planning?.members_count ?? 0) > 1 && credit.creator;
+
     return (
         <Card
             size="small"
@@ -50,6 +54,7 @@ export function CreditCard({ credit, formatCurrency, onClick }: CreditCardProps)
                         </Typography.Text>
                         <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                             {credit.entity || credit.type_label}
+                            {showCreator && ` · ${credit.creator!.name.split(' ')[0]}`}
                         </Typography.Text>
                     </div>
                 </div>

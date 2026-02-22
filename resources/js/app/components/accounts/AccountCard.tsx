@@ -29,6 +29,7 @@ const iconMap: Record<string, React.ReactNode> = {
 
 export function AccountCard({ account, onClick }: Props) {
     const { planning } = usePlanning();
+    const showCreator = (planning?.members_count ?? 0) > 1 && account.creator;
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-CL', {
@@ -76,6 +77,7 @@ export function AccountCard({ account, onClick }: Props) {
                     </div>
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                         {account.type_label}
+                        {showCreator && ` · ${account.creator!.name.split(' ')[0]}`}
                     </Typography.Text>
                 </div>
                 <div style={{ textAlign: 'right' }}>

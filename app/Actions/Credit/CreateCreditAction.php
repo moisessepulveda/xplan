@@ -17,6 +17,9 @@ class CreateCreditAction
     public function execute(array $data): Credit
     {
         return DB::transaction(function () use ($data) {
+            // Set planning_id from active planning if not provided
+            $data['planning_id'] = $data['planning_id'] ?? auth()->user()->active_planning_id;
+            $data['created_by'] = $data['created_by'] ?? auth()->id();
             $data['pending_amount'] = $data['original_amount'];
             $data['interest_rate_type'] = $data['interest_rate_type'] ?? 'annual';
 

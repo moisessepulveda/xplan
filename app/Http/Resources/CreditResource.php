@@ -55,6 +55,9 @@ class CreditResource extends JsonResource
                 fn() => $this->next_installment ? new CreditInstallmentResource($this->next_installment) : null
             ),
 
+            'created_by' => $this->created_by,
+            'creator' => new UserResource($this->whenLoaded('creator')),
+
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

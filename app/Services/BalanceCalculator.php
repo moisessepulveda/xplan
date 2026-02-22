@@ -31,6 +31,7 @@ class BalanceCalculator
     public function getAccountsSummary(?int $planningId = null): array
     {
         $accounts = Account::query()
+            ->with('creator')
             ->when($planningId, fn($q) => $q->forPlanning($planningId))
             ->active()
             ->ordered()

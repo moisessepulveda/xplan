@@ -24,6 +24,10 @@ class AccountResource extends JsonResource
             'include_in_total' => $this->include_in_total,
             'is_archived' => $this->is_archived,
             'order' => $this->order,
+
+            'created_by' => $this->created_by,
+            'creator' => new UserResource($this->whenLoaded('creator')),
+
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

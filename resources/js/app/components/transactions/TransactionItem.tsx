@@ -95,6 +95,9 @@ export function TransactionItem({ transaction, onClick }: Props) {
                     <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                         {transaction.category?.name || transaction.type_label}
                         {transaction.account && ` · ${transaction.account.name}`}
+                        {planning && (planning.members_count ?? 0) > 1 && transaction.creator && (
+                            <> · {transaction.creator.name.split(' ')[0]}</>
+                        )}
                     </Typography.Text>
                 </div>
 

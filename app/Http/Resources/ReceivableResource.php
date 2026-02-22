@@ -29,6 +29,7 @@ class ReceivableResource extends JsonResource
             'is_overdue' => $this->isOverdue(),
             'notes' => $this->notes,
             'created_by' => $this->created_by,
+            'creator' => new UserResource($this->whenLoaded('creator')),
 
             // Relationships
             'payments' => ReceivablePaymentResource::collection($this->whenLoaded('payments')),

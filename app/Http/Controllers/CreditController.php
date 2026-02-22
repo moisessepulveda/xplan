@@ -32,7 +32,7 @@ class CreditController extends Controller
         $type = $request->get('type');
         $status = $request->get('status', 'active');
 
-        $query = Credit::with(['installments'])
+        $query = Credit::with(['installments', 'creator'])
             ->when($type, fn($q) => $q->where('type', $type))
             ->when($status && $status !== 'all', fn($q) => $q->where('status', $status))
             ->orderBy('created_at', 'desc');
@@ -86,7 +86,7 @@ class CreditController extends Controller
 
     public function show(Credit $credit): Response
     {
-        $credit->load(['installments', 'extraPayments.account', 'account']);
+        $credit->load(['installments', 'extraPayments.account', 'account', 'creator']);
 
         return Inertia::render('Credits/Show', [
             'credit' => new CreditResource($credit),

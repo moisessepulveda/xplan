@@ -112,6 +112,8 @@ export interface Account {
   include_in_total: boolean;
   is_archived: boolean;
   order: number;
+  created_by?: number;
+  creator?: User;
   created_at: string;
   updated_at: string;
 }
@@ -289,6 +291,7 @@ export interface Receivable {
   is_overdue: boolean;
   notes?: string;
   created_by: number;
+  creator?: User;
   created_at: string;
   updated_at: string;
   payments?: ReceivablePayment[];
@@ -456,6 +459,8 @@ export interface Credit {
   installments?: CreditInstallment[];
   extra_payments?: ExtraPayment[];
   next_installment?: CreditInstallment;
+  created_by?: number;
+  creator?: User;
   created_at: string;
   updated_at: string;
 }

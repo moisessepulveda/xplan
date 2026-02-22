@@ -16,6 +16,7 @@ interface Props {
 
 export function ReceivableCard({ receivable, onClick }: Props) {
     const { planning } = usePlanning();
+    const showCreator = (planning?.members_count ?? 0) > 1 && receivable.creator;
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-CL', {
@@ -61,6 +62,7 @@ export function ReceivableCard({ receivable, onClick }: Props) {
                         </div>
                         <Typography.Text type="secondary" style={{ fontSize: 13 }}>
                             {receivable.concept}
+                            {showCreator && ` · ${receivable.creator!.name.split(' ')[0]}`}
                         </Typography.Text>
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
