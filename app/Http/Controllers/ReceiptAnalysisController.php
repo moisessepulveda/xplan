@@ -28,15 +28,6 @@ class ReceiptAnalysisController extends Controller
             $path = Storage::disk('local')->putFileAs('', $file, $filename);
             $fullPath = Storage::disk('local')->path($path);
 
-            Log::info('Receipt analysis starting', [
-                'planning_id' => $planningId,
-                'filename' => $filename,
-                'full_path' => $fullPath,
-                'file_exists' => file_exists($fullPath),
-                'file_size' => file_exists($fullPath) ? filesize($fullPath) : 0,
-                'mime_type' => $file->getMimeType(),
-            ]);
-
             // Parse the receipt with AI
             $agent = ReceiptImageParser::forPlanning($planningId, $fullPath);
 

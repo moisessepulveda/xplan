@@ -372,61 +372,39 @@ export default function TransactionsIndex({
                         <List
                             dataSource={pendingTransactions}
                             renderItem={(tx) => (
-                                <List.Item
-                                    style={{ padding: '8px 0' }}
-                                    actions={[
-                                        <Button
-                                            key="approve"
-                                            type="primary"
-                                            size="small"
-                                            icon={<CheckOutlined />}
-                                            loading={processingId === tx.id}
-                                            onClick={() => handleApprove(tx)}
-                                            style={{ backgroundColor: colors.success[500] }}
-                                        />,
-                                        <Popconfirm
-                                            key="reject"
-                                            title="¿Rechazar transacción?"
-                                            description="Esta transacción será eliminada"
-                                            onConfirm={() => handleReject(tx)}
-                                            okText="Sí, rechazar"
-                                            cancelText="Cancelar"
-                                            okButtonProps={{ danger: true }}
-                                        >
-                                            <Button
-                                                danger
-                                                size="small"
-                                                icon={<CloseOutlined />}
-                                                loading={processingId === tx.id}
-                                            />
-                                        </Popconfirm>,
-                                    ]}
-                                >
-                                    <List.Item.Meta
-                                        avatar={
-                                            <Avatar
-                                                size={40}
-                                                style={{
-                                                    backgroundColor: tx.category?.color || (tx.type === 'expense' ? colors.error[500] : colors.success[500]),
-                                                }}
-                                                icon={getIconComponent(tx.category?.icon)}
-                                            />
-                                        }
-                                        title={
-                                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <List.Item style={{ padding: '12px 0', display: 'block' }}>
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                                        <Avatar
+                                            size={40}
+                                            style={{
+                                                backgroundColor: tx.category?.color || (tx.type === 'expense' ? colors.error[500] : colors.success[500]),
+                                                flexShrink: 0,
+                                            }}
+                                            icon={getIconComponent(tx.category?.icon)}
+                                        />
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 8, marginBottom: 4 }}>
                                                 <Typography.Text
-                                                    style={{ cursor: 'pointer' }}
+                                                    style={{ cursor: 'pointer', wordBreak: 'break-word' }}
                                                     onClick={() => handleSelectTransaction(tx)}
                                                 >
                                                     {tx.description || 'Sin descripción'}
                                                 </Typography.Text>
-                                                <Tag color={tx.type === 'expense' ? 'red' : 'green'} style={{ fontSize: 11 }}>
+                                                <Typography.Text
+                                                    strong
+                                                    style={{
+                                                        color: tx.type === 'expense' ? colors.error[500] : colors.success[500],
+                                                        whiteSpace: 'nowrap',
+                                                        flexShrink: 0,
+                                                    }}
+                                                >
+                                                    {tx.type === 'expense' ? '-' : '+'}{formatCurrency(tx.amount)}
+                                                </Typography.Text>
+                                            </div>
+                                            <Space size={4} wrap style={{ marginBottom: 8 }}>
+                                                <Tag color={tx.type === 'expense' ? 'red' : 'green'} style={{ fontSize: 11, margin: 0 }}>
                                                     {tx.type_label}
                                                 </Tag>
-                                            </div>
-                                        }
-                                        description={
-                                            <Space size={4} wrap>
                                                 <Typography.Text type="secondary" style={{ fontSize: 12 }}>
                                                     {tx.date}
                                                 </Typography.Text>
@@ -447,17 +425,37 @@ export default function TransactionsIndex({
                                                     </>
                                                 )}
                                             </Space>
-                                        }
-                                    />
-                                    <Typography.Text
-                                        strong
-                                        style={{
-                                            color: tx.type === 'expense' ? colors.error[500] : colors.success[500],
-                                            marginRight: 8,
-                                        }}
-                                    >
-                                        {tx.type === 'expense' ? '-' : '+'}{formatCurrency(tx.amount)}
-                                    </Typography.Text>
+                                            <div style={{ display: 'flex', gap: 8 }}>
+                                                <Button
+                                                    type="primary"
+                                                    size="small"
+                                                    icon={<CheckOutlined />}
+                                                    loading={processingId === tx.id}
+                                                    onClick={() => handleApprove(tx)}
+                                                    style={{ backgroundColor: colors.success[500] }}
+                                                >
+                                                    Aprobar
+                                                </Button>
+                                                <Popconfirm
+                                                    title="¿Rechazar transacción?"
+                                                    description="Esta transacción será eliminada"
+                                                    onConfirm={() => handleReject(tx)}
+                                                    okText="Sí, rechazar"
+                                                    cancelText="Cancelar"
+                                                    okButtonProps={{ danger: true }}
+                                                >
+                                                    <Button
+                                                        danger
+                                                        size="small"
+                                                        icon={<CloseOutlined />}
+                                                        loading={processingId === tx.id}
+                                                    >
+                                                        Rechazar
+                                                    </Button>
+                                                </Popconfirm>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </List.Item>
                             )}
                         />
