@@ -26,8 +26,10 @@ if [ ! -f /var/www/html/database/database.sqlite ]; then
     touch /var/www/html/database/database.sqlite
 fi
 
-# Fix permissions for www user
-chown -R www:www /var/www/html/storage /var/www/html/database /var/www/html/bootstrap/cache
+# Function to fix permissions for www user
+fix_permissions() {
+    chown -R www:www /var/www/html/storage /var/www/html/database /var/www/html/bootstrap/cache
+}
 
 # Function to run migrations (only on octane container to avoid race conditions)
 run_migrations() {
@@ -53,9 +55,12 @@ case $SERVICE in
     octane)
         echo "${GREEN}Starting Octane server...${NC}"
 
-        # Run migrations
+        # Run migrations and cache config
         run_migrations
         cache_config
+
+        # Fix permissions after all files are created
+        fix_permissions
 
         # Remove queue and scheduler configs, keep only octane
         rm -f /etc/supervisor/conf.d/queue.conf
@@ -71,6 +76,9 @@ case $SERVICE in
         # Wait for app to be ready
         sleep 10
 
+        # Fix permissions
+        fix_permissions
+
         # Remove octane and scheduler configs, keep only queue
         rm -f /etc/supervisor/conf.d/octane.conf
         rm -f /etc/supervisor/conf.d/scheduler.conf
@@ -83,6 +91,9 @@ case $SERVICE in
 
         # Wait for app to be ready
         sleep 10
+
+        # Fix permissions
+        fix_permissions
 
         # Remove octane and queue configs, keep only scheduler
         rm -f /etc/supervisor/conf.d/octane.conf
