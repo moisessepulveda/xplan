@@ -1,27 +1,5 @@
 # =============================================================================
-# Stage 1: Build frontend assets
-# =============================================================================
-FROM node:20-alpine AS frontend-builder
-
-WORKDIR /app
-
-# Copy package files
-COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
-
-# Install dependencies
-RUN npm ci --prefer-offline --no-audit
-
-# Copy source files needed for build
-COPY resources ./resources
-COPY vite.config.ts tsconfig.json tsconfig.node.json ./
-COPY public ./public
-
-# Build assets
-RUN npm run build
-
-
-# =============================================================================
-# Stage 2: PHP dependencies
+# Stage 1: PHP dependencies
 # =============================================================================
 FROM php:8.4-cli-alpine AS composer-builder
 
@@ -52,7 +30,7 @@ RUN composer dump-autoload --optimize --no-dev --no-scripts
 
 
 # =============================================================================
-# Stage 3: Production image
+# Stage 2: Production image
 # =============================================================================
 FROM php:8.4-cli-alpine AS production
 
@@ -102,10 +80,9 @@ RUN addgroup -g 1000 -S www && adduser -u 1000 -S www -G www
 
 WORKDIR /var/www/html
 
-# Copy application from builders
+# Copy application from builder
 COPY --from=composer-builder /app/vendor ./vendor
 COPY . .
-COPY --from=frontend-builder /app/public/build ./public/build
 
 # Create necessary directories and set permissions
 RUN mkdir -p \
