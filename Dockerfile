@@ -3,9 +3,9 @@
 # =============================================================================
 FROM php:8.4-cli-alpine AS composer-builder
 
-# Install zip extension required by some packages
-RUN apk add --no-cache libzip-dev \
-    && docker-php-ext-install zip
+# Install extensions required by some packages
+RUN apk add --no-cache libzip-dev icu-dev \
+    && docker-php-ext-install zip intl
 
 # Install composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
