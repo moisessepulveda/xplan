@@ -26,6 +26,9 @@ if [ ! -f /var/www/html/database/database.sqlite ]; then
     touch /var/www/html/database/database.sqlite
 fi
 
+# Fix permissions for www user
+chown -R www:www /var/www/html/storage /var/www/html/database /var/www/html/bootstrap/cache
+
 # Function to run migrations (only on octane container to avoid race conditions)
 run_migrations() {
     echo "${YELLOW}Running migrations...${NC}"
