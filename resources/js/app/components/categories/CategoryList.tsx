@@ -8,9 +8,10 @@ import { colors } from '@/app/styles/theme';
 interface Props {
     incomeCategories: Category[];
     expenseCategories: Category[];
+    savingsCategories?: Category[];
 }
 
-export function CategoryList({ incomeCategories, expenseCategories }: Props) {
+export function CategoryList({ incomeCategories, expenseCategories, savingsCategories = [] }: Props) {
     const handleEdit = (category: Category) => {
         router.visit(`/categories/${category.id}/edit`);
     };
@@ -82,11 +83,44 @@ export function CategoryList({ incomeCategories, expenseCategories }: Props) {
                 />
             ),
         },
+        {
+            key: 'savings',
+            label: (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div
+                        style={{
+                            width: 12,
+                            height: 12,
+                            borderRadius: 3,
+                            backgroundColor: '#1890ff',
+                        }}
+                    />
+                    <Typography.Text strong>Ahorro</Typography.Text>
+                    <Typography.Text type="secondary">({savingsCategories.length})</Typography.Text>
+                </div>
+            ),
+            children: savingsCategories.length > 0 ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {savingsCategories.map((category) => (
+                        <CategoryItem
+                            key={category.id}
+                            category={category}
+                            onEdit={() => handleEdit(category)}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <Empty
+                    image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    description="No hay categorías de ahorro"
+                />
+            ),
+        },
     ];
 
     return (
         <Collapse
-            defaultActiveKey={['income', 'expense']}
+            defaultActiveKey={['income', 'expense', 'savings']}
             items={items}
             ghost
             style={{ backgroundColor: 'transparent' }}

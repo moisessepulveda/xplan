@@ -9,10 +9,11 @@ import { Category, CategoryTypeOption } from '@/app/types';
 interface Props {
     incomeCategories: Category[];
     expenseCategories: Category[];
+    savingsCategories: Category[];
     categoryTypes: CategoryTypeOption[];
 }
 
-export default function CategoriesIndex({ incomeCategories, expenseCategories, categoryTypes }: Props) {
+export default function CategoriesIndex({ incomeCategories, expenseCategories, savingsCategories, categoryTypes }: Props) {
     return (
         <AppLayout title="Categorías" showBack>
             <Head title="Categorías" />
@@ -21,6 +22,7 @@ export default function CategoriesIndex({ incomeCategories, expenseCategories, c
                 <CategoryList
                     incomeCategories={incomeCategories}
                     expenseCategories={expenseCategories}
+                    savingsCategories={savingsCategories}
                 />
 
                 <Button

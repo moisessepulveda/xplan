@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\CategoryType;
 use App\Enums\TransactionType;
 use App\Models\Budget;
 use App\Models\BudgetHistory;
@@ -121,6 +122,19 @@ class BudgetCalculator
 
     public function getSpentForCategory(int $categoryId, int $year, int $month): float
     {
+        $category = Category::find($categoryId);
+
+        // Para categorías de ahorro, contar transferencias asociadas
+        if ($category && $category->type === CategoryType::SAVINGS) {
+            return (float) Transaction::query()
+                ->where('type', TransactionType::TRANSFER)
+                ->where('category_id', $categoryId)
+                ->whereYear('date', $year)
+                ->whereMonth('date', $month)
+                ->sum('amount');
+        }
+
+        // Comportamiento actual para gastos
         return (float) Transaction::query()
             ->where('type', TransactionType::EXPENSE)
             ->where('category_id', $categoryId)

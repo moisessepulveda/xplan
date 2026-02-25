@@ -6,12 +6,14 @@ enum CategoryType: string
 {
     case INCOME = 'income';
     case EXPENSE = 'expense';
+    case SAVINGS = 'savings';
 
     public function label(): string
     {
         return match ($this) {
             self::INCOME => 'Ingreso',
             self::EXPENSE => 'Gasto',
+            self::SAVINGS => 'Ahorro',
         };
     }
 
@@ -20,6 +22,7 @@ enum CategoryType: string
         return match ($this) {
             self::INCOME => '#52c41a',
             self::EXPENSE => '#ff4d4f',
+            self::SAVINGS => '#1890ff',
         };
     }
 

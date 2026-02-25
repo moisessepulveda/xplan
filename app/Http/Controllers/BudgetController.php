@@ -56,7 +56,7 @@ class BudgetController extends Controller
             ->active()
             ->first();
 
-        $categories = Category::where('type', 'expense')
+        $categories = Category::whereIn('type', ['expense', 'savings'])
             ->where('is_archived', false)
             ->whereNull('parent_id')
             ->with(['children' => function ($query) {

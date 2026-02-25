@@ -179,7 +179,7 @@ export interface Category {
   updated_at: string;
 }
 
-export type CategoryType = 'income' | 'expense';
+export type CategoryType = 'income' | 'expense' | 'savings';
 
 export interface CategoryTypeOption {
   value: CategoryType;

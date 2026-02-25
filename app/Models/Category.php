@@ -76,6 +76,11 @@ class Category extends Model
         return $query->where('type', CategoryType::EXPENSE);
     }
 
+    public function scopeSavings($query)
+    {
+        return $query->where('type', CategoryType::SAVINGS);
+    }
+
     public function scopeSystemType($query, string $systemType)
     {
         return $query->where('system_type', $systemType);

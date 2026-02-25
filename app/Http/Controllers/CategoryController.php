@@ -34,9 +34,17 @@ class CategoryController extends Controller
             ->ordered()
             ->get();
 
+        $savingsCategories = Category::with('children')
+            ->savings()
+            ->active()
+            ->roots()
+            ->ordered()
+            ->get();
+
         return Inertia::render('Categories/Index', [
             'incomeCategories' => CategoryResource::collection($incomeCategories),
             'expenseCategories' => CategoryResource::collection($expenseCategories),
+            'savingsCategories' => CategoryResource::collection($savingsCategories),
             'categoryTypes' => CategoryType::options(),
         ]);
     }
@@ -47,13 +55,15 @@ class CategoryController extends Controller
             ->roots()
             ->ordered()
             ->get()
-            ->groupBy('type');
+            ->groupBy(fn($cat) => $cat->type->value);
+
 
         return Inertia::render('Categories/Create', [
             'categoryTypes' => CategoryType::options(),
             'parentCategories' => [
                 'income' => CategoryResource::collection($parentCategories->get('income', collect())),
                 'expense' => CategoryResource::collection($parentCategories->get('expense', collect())),
+                'savings' => CategoryResource::collection($parentCategories->get('savings', collect())),
             ],
         ]);
     }

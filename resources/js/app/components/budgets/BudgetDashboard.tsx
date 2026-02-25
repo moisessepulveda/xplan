@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Card, Typography, Row, Col } from 'antd';
 import { ProgressBar } from './ProgressBar';
 import { BudgetCategoryCard } from './BudgetCategoryCard';
@@ -12,6 +12,35 @@ interface BudgetDashboardProps {
 }
 
 export function BudgetDashboard({ progress, formatCurrency, onCategoryClick }: BudgetDashboardProps) {
+    // Separate expense and savings lines
+    const { expenseLines, savingsLines, expenseTotals, savingsTotals } = useMemo(() => {
+        const expense = progress.lines.filter(line => line.category?.type !== 'savings');
+        const savings = progress.lines.filter(line => line.category?.type === 'savings');
+
+        const expenseBudgeted = expense.reduce((sum, l) => sum + l.amount, 0);
+        const expenseSpent = expense.reduce((sum, l) => sum + l.spent, 0);
+
+        const savingsBudgeted = savings.reduce((sum, l) => sum + l.amount, 0);
+        const savingsSpent = savings.reduce((sum, l) => sum + l.spent, 0);
+
+        return {
+            expenseLines: expense,
+            savingsLines: savings,
+            expenseTotals: {
+                budgeted: expenseBudgeted,
+                spent: expenseSpent,
+                remaining: Math.max(0, expenseBudgeted - expenseSpent),
+                percentage: expenseBudgeted > 0 ? (expenseSpent / expenseBudgeted) * 100 : 0,
+            },
+            savingsTotals: {
+                budgeted: savingsBudgeted,
+                spent: savingsSpent,
+                remaining: Math.max(0, savingsBudgeted - savingsSpent),
+                percentage: savingsBudgeted > 0 ? (savingsSpent / savingsBudgeted) * 100 : 0,
+            },
+        };
+    }, [progress.lines]);
+
     return (
         <div>
             {/* Overall Progress Card */}
@@ -90,19 +119,67 @@ export function BudgetDashboard({ progress, formatCurrency, onCategoryClick }: B
                 </Row>
             </Card>
 
-            {/* Category Lines */}
-            <Typography.Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 8 }}>
-                POR CATEGORÍA
-            </Typography.Text>
+            {/* Expense Lines Section */}
+            {expenseLines.length > 0 && (
+                <>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                            GASTOS
+                        </Typography.Text>
+                        <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                            {formatCurrency(expenseTotals.spent)} / {formatCurrency(expenseTotals.budgeted)} ({expenseTotals.percentage.toFixed(0)}%)
+                        </Typography.Text>
+                    </div>
 
-            {progress.lines.map((line) => (
-                <BudgetCategoryCard
-                    key={line.id}
-                    line={line}
-                    formatCurrency={formatCurrency}
-                    onClick={onCategoryClick ? () => onCategoryClick(line) : undefined}
-                />
-            ))}
+                    {expenseLines.map((line) => (
+                        <BudgetCategoryCard
+                            key={line.id}
+                            line={line}
+                            formatCurrency={formatCurrency}
+                            onClick={onCategoryClick ? () => onCategoryClick(line) : undefined}
+                        />
+                    ))}
+                </>
+            )}
+
+            {/* Savings Lines Section */}
+            {savingsLines.length > 0 && (
+                <>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: 8,
+                        marginTop: expenseLines.length > 0 ? 20 : 0,
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <div
+                                style={{
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: 2,
+                                    backgroundColor: '#1890ff',
+                                }}
+                            />
+                            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+                                AHORRO
+                            </Typography.Text>
+                        </div>
+                        <Typography.Text type="secondary" style={{ fontSize: 11 }}>
+                            {formatCurrency(savingsTotals.spent)} / {formatCurrency(savingsTotals.budgeted)} ({savingsTotals.percentage.toFixed(0)}%)
+                        </Typography.Text>
+                    </div>
+
+                    {savingsLines.map((line) => (
+                        <BudgetCategoryCard
+                            key={line.id}
+                            line={line}
+                            formatCurrency={formatCurrency}
+                            onClick={onCategoryClick ? () => onCategoryClick(line) : undefined}
+                        />
+                    ))}
+                </>
+            )}
         </div>
     );
 }

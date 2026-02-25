@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Transaction;
 
+use App\Enums\CategoryType;
 use App\Enums\TransactionType;
+use App\Models\Category;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -31,6 +33,22 @@ class StoreTransactionRequest extends FormRequest
             'is_recurring' => ['nullable', 'boolean'],
             'from_recurring_id' => ['nullable', 'integer', 'exists:recurring_transactions,id'],
         ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            // Validate that transfers can only have savings categories
+            if ($this->type === TransactionType::TRANSFER->value && $this->category_id) {
+                $category = Category::find($this->category_id);
+                if ($category && $category->type !== CategoryType::SAVINGS) {
+                    $validator->errors()->add(
+                        'category_id',
+                        'Las transferencias solo pueden asociarse a categorías de ahorro.'
+                    );
+                }
+            }
+        });
     }
 
     public function messages(): array

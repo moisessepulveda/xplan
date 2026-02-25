@@ -12,7 +12,7 @@ interface CategoryPickerProps {
     onSelect: (category: Category) => void;
     categories: Category[];
     selectedId?: number;
-    type?: 'income' | 'expense';
+    type?: 'income' | 'expense' | 'savings';
     title?: string;
 }
 

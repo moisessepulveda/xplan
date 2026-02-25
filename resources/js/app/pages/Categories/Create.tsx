@@ -10,6 +10,7 @@ interface Props {
     parentCategories: {
         income: Category[];
         expense: Category[];
+        savings: Category[];
     };
 }
 
@@ -29,6 +30,8 @@ export default function CreateCategory({ categoryTypes, parentCategories }: Prop
     // Get parent categories based on selected type
     const availableParents = data.type === 'income'
         ? parentCategories.income
+        : data.type === 'savings'
+        ? parentCategories.savings
         : parentCategories.expense;
 
     return (

@@ -69,11 +69,17 @@ export function TransactionForm({
     onSubmit,
 }: Props) {
     const [showCategoryPicker, setShowCategoryPicker] = useState(false);
+    const [showSavingsCategoryPicker, setShowSavingsCategoryPicker] = useState(false);
     const [analyzingReceipt, setAnalyzingReceipt] = useState(false);
     const [receiptPreview, setReceiptPreview] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const isTransfer = data.type === 'transfer';
     const isExpense = data.type === 'expense';
+
+    // Filter savings categories
+    const savingsCategories = useMemo(() => {
+        return categories.filter(c => c.type === 'savings');
+    }, [categories]);
 
     // Handle receipt photo upload and analysis
     const handleReceiptUpload = async (file: File) => {
@@ -428,6 +434,81 @@ export function TransactionForm({
                     />
                 </Form.Item>
             )}
+
+            {/* Savings category for transfers */}
+            {isTransfer && savingsCategories.length > 0 && (
+                <Form.Item
+                    label="Meta de ahorro (opcional)"
+                    validateStatus={errors.category_id ? 'error' : ''}
+                    help={errors.category_id || "Si esta transferencia es para ahorro, selecciona la meta"}
+                >
+                    <div
+                        onClick={() => setShowSavingsCategoryPicker(true)}
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            padding: '8px 12px',
+                            border: '1px solid var(--ant-color-border)',
+                            borderRadius: 8,
+                            cursor: 'pointer',
+                            minHeight: 40,
+                            backgroundColor: 'var(--ant-color-bg-container)',
+                            transition: 'border-color 0.2s',
+                        }}
+                    >
+                        {selectedCategory && selectedCategory.type === 'savings' ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <div
+                                    style={{
+                                        width: 32,
+                                        height: 32,
+                                        borderRadius: '50%',
+                                        backgroundColor: selectedCategory.color || selectedCategory.type_color || colors.primary[500],
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: '#fff',
+                                        fontSize: 14,
+                                    }}
+                                >
+                                    {getIcon(selectedCategory.icon)}
+                                </div>
+                                <span>{selectedCategory.full_name || selectedCategory.name}</span>
+                            </div>
+                        ) : (
+                            <span style={{ color: 'var(--ant-color-text-placeholder)' }}>
+                                No es ahorro
+                            </span>
+                        )}
+                        <RightOutlined style={{ color: 'var(--ant-color-text-tertiary)', fontSize: 12 }} />
+                    </div>
+                    {selectedCategory && selectedCategory.type === 'savings' && (
+                        <Button
+                            type="link"
+                            size="small"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setData('category_id', undefined);
+                            }}
+                            style={{ padding: 0, marginTop: 4 }}
+                        >
+                            Quitar meta de ahorro
+                        </Button>
+                    )}
+                </Form.Item>
+            )}
+
+            {/* Savings Category Picker */}
+            <CategoryPicker
+                open={showSavingsCategoryPicker}
+                onClose={() => setShowSavingsCategoryPicker(false)}
+                onSelect={(category) => setData('category_id', category.id)}
+                categories={savingsCategories}
+                selectedId={data.category_id}
+                type="savings"
+                title="Seleccionar Meta de Ahorro"
+            />
 
             {/* Category (not for transfers) */}
             {!isTransfer && (
