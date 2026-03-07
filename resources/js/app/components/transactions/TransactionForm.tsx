@@ -125,6 +125,7 @@ export function TransactionForm({
             } else if (response.data.success && !response.data.data.is_valid_receipt) {
                 message.warning('La imagen no parece ser un recibo o comprobante de pago.');
             } else {
+                console.log(response);
                 message.error(response.data.error || 'Error al analizar la imagen.');
             }
         } catch (error: unknown) {
