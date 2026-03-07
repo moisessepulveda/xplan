@@ -24,13 +24,6 @@ services:
         delay: 5s
         max_attempts: 5
         window: 120s
-      resources:
-        limits:
-          cpus: "1"
-          memory: 512M
-        reservations:
-          cpus: "0.25"
-          memory: 128M
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
@@ -54,6 +47,7 @@ services:
       SENTRY_LARAVEL_DSN: ${SENTRY_LARAVEL_DSN:-}
       SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.0}
       SENTRY_SEND_DEFAULT_PII: ${SENTRY_SEND_DEFAULT_PII:-false}
+      LOG_STACK: ${LOG_STACK:-false}
     volumes:
       - ${SQLITE_DATA_PATH}:/var/www/html/database
       - ${STORAGE_PRIVATE_PATH}:/var/www/html/storage/app/private
@@ -80,13 +74,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      resources:
-        limits:
-          cpus: "0.5"
-          memory: 256M
-        reservations:
-          cpus: "0.1"
-          memory: 64M
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
@@ -109,6 +96,7 @@ services:
       SENTRY_LARAVEL_DSN: ${SENTRY_LARAVEL_DSN:-}
       SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.0}
       SENTRY_SEND_DEFAULT_PII: ${SENTRY_SEND_DEFAULT_PII:-false}
+      LOG_STACK: ${LOG_STACK:-false}
     volumes:
       - ${SQLITE_DATA_PATH}:/var/www/html/database
       - ${STORAGE_PRIVATE_PATH}:/var/www/html/storage/app/private
@@ -131,13 +119,6 @@ services:
         delay: 5s
         max_attempts: 3
         window: 120s
-      resources:
-        limits:
-          cpus: "0.25"
-          memory: 128M
-        reservations:
-          cpus: "0.1"
-          memory: 64M
     environment:
       APP_ENV: production
       APP_DEBUG: "false"
@@ -152,6 +133,7 @@ services:
       SENTRY_LARAVEL_DSN: ${SENTRY_LARAVEL_DSN:-}
       SENTRY_TRACES_SAMPLE_RATE: ${SENTRY_TRACES_SAMPLE_RATE:-0.0}
       SENTRY_SEND_DEFAULT_PII: ${SENTRY_SEND_DEFAULT_PII:-false}
+      LOG_STACK: ${LOG_STACK:-false}
     volumes:
       - ${SQLITE_DATA_PATH}:/var/www/html/database
       - ${STORAGE_PRIVATE_PATH}:/var/www/html/storage/app/private

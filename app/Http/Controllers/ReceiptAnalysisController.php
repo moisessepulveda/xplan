@@ -54,6 +54,8 @@ class ReceiptAnalysisController extends Controller
             ]);
 
         } catch (\Exception $e) {
+            report($e);
+
             Log::error('Receipt analysis failed', [
                 'planning_id' => $planningId,
                 'error' => $e->getMessage(),
